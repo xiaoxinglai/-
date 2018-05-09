@@ -15,7 +15,16 @@
     <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
   </resultMap>
 
+  <select id="selectByPageAndsellIdAndTypeId" resultMap="BaseResultMap" >
+    select product_id, product_name, product_price, product_stock, product_description,
+    product_icon, product_status, sell_id, category_type, create_time, update_time
+    from product_info where sell_id=#{sellId} and category_type=#{TypeId} limit #{currentPage},#{pageSize}
+  </select>
 
+  <select id="selectCountByPageAndsellIdAndTypeId" resultType="Integer" >
+    select count(1)
+    from product_info where sell_id=#{sellId} and category_type=#{TypeId}
+  </select>
 
 
 

@@ -31,7 +31,8 @@ spring:
         encoding: UTF-8
         check-template-location: false
         check-template: false
-        mode: HTML5
+        #mode: HTML5 这个是严格检查 一点标签都不能错
+        mode: LEGACYHTML5
         cache: false
 
 #logging:

@@ -16,4 +16,9 @@ public interface ProductInfoMapperEx  extends ProductInfoMapper {
     List<ProductInfo> selectByPageAndsellId(@Param("currentPage") Integer currentPage,@Param("pageSize") Integer pageSize,@Param("sellId") String sellId);
     int selectCountByPageAndsellId(String sellId);
 
+
+    List<ProductInfo> selectByPageAndsellIdAndTypeId(@Param("currentPage") Integer currentPage,@Param("pageSize") Integer pageSize,@Param("sellId") String sellId,@Param("TypeId") Integer TypeId);
+    int selectCountByPageAndsellIdAndTypeId(@Param("sellId") String sellId,@Param("TypeId") Integer TypeId);
+
+
 }

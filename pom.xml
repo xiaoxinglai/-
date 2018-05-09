@@ -97,6 +97,13 @@
             <version>2.5.3</version>
         </dependency>
 
+        <!--增加thymeleaf的非严格检查-->
+        <dependency>
+            <groupId>net.sourceforge.nekohtml</groupId>
+            <artifactId>nekohtml</artifactId>
+            <version>1.9.22</version>
+        </dependency>
+
 
 
 

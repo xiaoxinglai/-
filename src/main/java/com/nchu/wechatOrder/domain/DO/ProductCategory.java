@@ -14,6 +14,8 @@ public class ProductCategory implements Serializable {
 
     private Date updateTime;
 
+    private String sellId;
+
     private static final long serialVersionUID = 1L;
 
     public Integer getCategoryId() {
@@ -56,6 +58,14 @@ public class ProductCategory implements Serializable {
         this.updateTime = updateTime;
     }
 
+    public String getSellId() {
+        return sellId;
+    }
+
+    public void setSellId(String sellId) {
+        this.sellId = sellId == null ? null : sellId.trim();
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -67,6 +77,7 @@ public class ProductCategory implements Serializable {
         sb.append(", categoryType=").append(categoryType);
         sb.append(", createTime=").append(createTime);
         sb.append(", updateTime=").append(updateTime);
+        sb.append(", sellId=").append(sellId);
         sb.append(", serialVersionUID=").append(serialVersionUID);
         sb.append("]");
         return sb.toString();

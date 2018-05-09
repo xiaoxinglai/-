@@ -7,6 +7,7 @@
     <result column="category_type" property="categoryType" jdbcType="INTEGER" />
     <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
     <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+    <result column="sell_id" property="sellId" jdbcType="VARCHAR" />
   </resultMap>
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
     delete from product_category
@@ -17,25 +18,26 @@
       SELECT LAST_INSERT_ID()
     </selectKey>
     insert into product_category (category_name, category_type, create_time, 
-      update_time)
+      update_time, sell_id)
     values (#{categoryName,jdbcType=VARCHAR}, #{categoryType,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP}, 
-      #{updateTime,jdbcType=TIMESTAMP})
+      #{updateTime,jdbcType=TIMESTAMP}, #{sellId,jdbcType=VARCHAR})
   </insert>
   <update id="updateByPrimaryKey" parameterType="com.nchu.wechatOrder.domain.DO.ProductCategory" >
     update product_category
     set category_name = #{categoryName,jdbcType=VARCHAR},
       category_type = #{categoryType,jdbcType=INTEGER},
       create_time = #{createTime,jdbcType=TIMESTAMP},
-      update_time = #{updateTime,jdbcType=TIMESTAMP}
+      update_time = #{updateTime,jdbcType=TIMESTAMP},
+      sell_id = #{sellId,jdbcType=VARCHAR}
     where category_id = #{categoryId,jdbcType=INTEGER}
   </update>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
-    select category_id, category_name, category_type, create_time, update_time
+    select category_id, category_name, category_type, create_time, update_time, sell_id
     from product_category
     where category_id = #{categoryId,jdbcType=INTEGER}
   </select>
   <select id="selectAll" resultMap="BaseResultMap" >
-    select category_id, category_name, category_type, create_time, update_time
+    select category_id, category_name, category_type, create_time, update_time, sell_id
     from product_category
   </select>
 </mapper>

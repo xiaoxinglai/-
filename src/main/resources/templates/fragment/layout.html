@@ -44,15 +44,37 @@
 
                 <li class="dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-fw fa-plus"></i> 菜品类型 <span class="caret"></span></a>
-                    <ul class="dropdown-menu" role="menu">
-                        <li class="dropdown-header">Dropdown heading</li>
-                        <li><a href="#">Action</a></li>
-                        <li><a href="#">Another action</a></li>
-                        <li><a href="#">Something else here</a></li>
-                        <li><a href="#">Separated link</a></li>
-                        <li><a href="#">One more separated link</a></li>
+                    <ul id="Type" class="dropdown-menu" role="menu">
+
+
                     </ul>
                 </li>
+                <script>
+                    /*<![CDATA[*/
+                    //获取该商家的菜类型列表
+                    $.ajax({
+                        url: "/product/queryProductType",
+                        type: "get",
+                        success: function (data) {
+                            $("#Type").html(
+                                '<li class="dropdown-header">菜品类型列表</li>'
+                            )
+
+
+                            for (var i = 0; i < data.length; i++) {
+
+                                $("#Type").append(
+                                    '<li><a href="/product/TypeIndex?typeId='+data[i].categoryType+'\&Name='+data[i].categoryName+'">'+data[i].categoryName+'</a></li>'
+                                )
+
+                            }
+
+
+
+                        }})
+
+                    /*]]>*/
+                </script>
 
                 <li>
                     <a th:href="@{/orderCar}"><i class="fa fa-fw fa-folder"></i> 我的购物车</a>
