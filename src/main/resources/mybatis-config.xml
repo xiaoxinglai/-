@@ -12,5 +12,12 @@
         <mapper resource="mybatis-mapper/ProductCategoryMapper.xml"/>
         <mapper resource="mybatis-mapper/ProductInfoMapper.xml"/>
         <mapper resource="mybatis-mapper/SellerInfoMapper.xml"/>
+
+        <mapper resource="mybatis-mapper/EX/ProductInfoMapper.xml"/>
+        <mapper resource="mybatis-mapper/EX/OrderDetailMapper.xml"/>
+        <mapper resource="mybatis-mapper/EX/OrderMasterMapper.xml"/>
+
+
+
     </mappers>
 </configuration>

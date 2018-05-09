@@ -17,13 +17,11 @@
     where detail_id = #{detailId,jdbcType=VARCHAR}
   </delete>
   <insert id="insert" parameterType="com.nchu.wechatOrder.domain.DO.OrderDetail" >
-    <selectKey resultType="java.lang.String" keyProperty="detailId" order="AFTER" >
-      SELECT LAST_INSERT_ID()
-    </selectKey>
-    insert into order_detail (order_id, product_id, product_name, 
+
+    insert into order_detail (detail_id,order_id, product_id, product_name,
       product_price, product_quantity, product_icon, 
       create_time, update_time)
-    values (#{orderId,jdbcType=VARCHAR}, #{productId,jdbcType=VARCHAR}, #{productName,jdbcType=VARCHAR}, 
+    values ( #{detailId,jdbcType=VARCHAR},#{orderId,jdbcType=VARCHAR}, #{productId,jdbcType=VARCHAR}, #{productName,jdbcType=VARCHAR},
       #{productPrice,jdbcType=DECIMAL}, #{productQuantity,jdbcType=INTEGER}, #{productIcon,jdbcType=VARCHAR}, 
       #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP})
   </insert>

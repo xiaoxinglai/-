@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="fragment/layout">
+<!-- layout文件路径-->
+
+<head>
+     <title>首页</title>
+
+
+</head>
+
+
+<body>
+<div layout:fragment="content">
+    <!--
+            作者：offline
+            时间：2017-03-28
+            描述：head begin
+        -->
+
+
+
+
+
+    <div class="container">
+
+
+
+        <h1><p class="text-center" th:text="${sellerInfo.username}"></p></h1>
+
+        <h5><p class="text-center" th:text="${sellerInfo.descript}"></p></h5>
+
+        <div style="margin: 5px;">
+
+            <div class="row" id="tab">
+
+
+            </div>
+
+
+
+            <p>总价¥<span id="sumCost" style="color: red">0</span></p>
+            <button type="button"  onclick="send()" class="btn btn-danger  btn-block ">点击加入购物车</button>
+
+
+
+
+
+
+                <ul class="pagination" id="pagination1"><!--分页导航 pagination  &laquo;箭头图标-->
+
+                </ul>
+
+            <script type="text/javascript" th:src="@{/js/jqPaginator.js}"></script>
+
+            <script type="text/javascript" th:inline="javascript">
+                /*<![CDATA[*/
+                $.jqPaginator('#pagination1', {
+                    totalPages: 4,
+                    visiblePages: 4,
+                    currentPage: 1,
+                    prev: '<li class="prev"><a href="javascript:;">Previous</a></li>',
+                    next: '<li class="next"><a href="javascript:;">Next</a></li>',
+                    page: '<li class="page"><a href="javascript:;">{{page}}</a></li>',
+
+                    onPageChange: function (num, type) {
+                        $.ajax({
+                            url: "/product/queryProduct?currPage=" + num+"&SellId="+[[${sellerInfo.sellId}]],
+                            type: "get",
+                            success: function (data) {
+
+                                $('#pagination1').jqPaginator('option', {
+                                    currentPage: data.currentPage,
+                                    totalPages: data.totalCount
+                                });
+
+
+                                $("#tab").html('<div></div>');
+
+
+                                for (var i = 0; i < data.data.length; i++) {
+                                    $("#tab").append(
+                                        '<div class=\"col-md-4\">' +
+                                        '<a  href=\"/question/list?courseId=' + data.data[i].productId + '\">' +
+                                        '<img style="width: 300px;height: 270px" src=\"' + data.data[i].productIcon + '\" alt=\"' + data.data[i].productName + '\"class=\"img-thumbnail\" />' +
+                                        '</a>' +
+                                        '<span   style="color: honeydew;text-align: center;text-decoration:none; font-size: larger; display: block; margin: 3px;">'
+                                        + data.data[i].productName +"¥"+'<span id=price'+data.data[i].productId+' style="color: red;font-style: italic;">'+data.data[i].productPrice+
+                                        '<input value='+data.data[i].productPrice+' type="checkbox"  onchange="checkBox('+data.data[i].productPrice+','+data.data[i].productId+')"/></span>' +
+
+                                       '<span onclick="onPrice('+data.data[i].productId+')"><input  type="hidden" id='+data.data[i].productId+'  style="width: 30px" /></span>'+'总价:¥<span id=totalPrice'+data.data[i].productId+' style="color: red">0</span>'+
+                                        '</span>' +
+                                        '</div>'+'<input id=num'+data.data[i].productId+' type="hidden" value="0" >'
+                                    )
+
+                                }
+
+
+                            }
+                        });
+
+
+                    }
+
+
+                });
+
+
+
+
+
+
+
+
+                /*]]>*/
+            </script>
+
+
+
+            <script>
+                /*<![CDATA[*/
+
+                function checkBox(price,id) {
+
+                    var spinner = $("#"+id).spinner();
+                    spinner.spinner( "value", 0 );
+
+                    $("#"+id).spinner({
+                        min: 0,
+                        max: 2500,
+                        step: 1,
+                        start: 0,
+
+                    });
+
+
+
+                    if ($("#"+id).attr("type")=="hidden") {
+                        $("#"+id).removeAttr("type");
+                    }else {
+                        $("#totalPrice"+id).text(0);
+                        $("#"+id).attr("type","hidden");
+                    }
+                    
+                }
+
+
+                var myMap=new Map();
+
+                //计算单件商品总价和订单总价
+                function onPrice(id) {
+                    var oldNum=parseInt($("#num"+id).val());
+                    var num=parseInt($("#"+id).val());
+                    var sPrice=$("#price"+id).text();
+                    var price=parseInt(sPrice);
+                    var oldtotalPrice=parseInt($("#totalPrice"+id).text());
+
+                    var sumCost=parseInt($("#sumCost").text());
+
+                    var totalprice= num*price;
+
+                    if (oldNum!=num){
+
+                        if (totalprice < oldtotalPrice){
+                            sumCost=sumCost-price;
+                            $("#sumCost").text(sumCost);
+                        }else{
+                            sumCost=sumCost+price;
+                            $("#sumCost").text(sumCost);
+
+                        }
+                    }
+
+
+                    $("#totalPrice"+id).text(totalprice);
+                    $("#num"+id).val(num);
+
+                    myMap.set(id,num);
+
+                }
+
+                /*]]>*/
+            </script>
+
+
+            <script th:src="@{/js/jquery.serializejson.min.js}"></script>
+            <script>
+                
+                function send() {
+
+                    var rebateMap = {};
+
+                    myMap.forEach(function (value, key, map){
+
+                        rebateMap[key] = value;
+                    })
+
+                    var str = JSON.stringify(rebateMap);
+
+
+
+                    $.ajax({
+                        url: "/OrderCar",
+                        type: "POST",
+                        dataType: "json",//预期服务器返回的数据类型
+                        contentType:"application/json",
+                        data: str,
+                        success: function (data) {
+                            if (data==1){
+                                alert("提交成功");
+                            }
+                        }});
+
+                }
+                
+                
+            </script>
+
+
+        </div>
+
+
+    </div>
+</div>
+
+</body>
+
+</html>

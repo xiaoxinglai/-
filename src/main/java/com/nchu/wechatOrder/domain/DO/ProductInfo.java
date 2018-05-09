@@ -5,7 +5,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 public class ProductInfo implements Serializable {
-    private Integer productId;
+    private String productId;
 
     private String productName;
 
@@ -29,12 +29,12 @@ public class ProductInfo implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    public Integer getProductId() {
+    public String getProductId() {
         return productId;
     }
 
-    public void setProductId(Integer productId) {
-        this.productId = productId;
+    public void setProductId(String productId) {
+        this.productId = productId == null ? null : productId.trim();
     }
 
     public String getProductName() {

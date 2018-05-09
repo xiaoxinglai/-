@@ -21,6 +21,12 @@ public class Result<T> {
     public Result() {
     }
 
+    public static Result Create(){
+        Result result=new Result();
+        result.setSuccess(Boolean.TRUE);
+        return result;
+    }
+
     public static Result Create(List data){
         Result result=new Result();
         result.setSuccess(Boolean.TRUE);

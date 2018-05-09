@@ -21,6 +21,8 @@ public class OrderMaster implements Serializable {
 
     private String sellId;
 
+    private Integer totalnum;
+
     private static final long serialVersionUID = 1L;
 
     public String getOrderId() {
@@ -87,6 +89,14 @@ public class OrderMaster implements Serializable {
         this.sellId = sellId == null ? null : sellId.trim();
     }
 
+    public Integer getTotalnum() {
+        return totalnum;
+    }
+
+    public void setTotalnum(Integer totalnum) {
+        this.totalnum = totalnum;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -101,6 +111,7 @@ public class OrderMaster implements Serializable {
         sb.append(", createTime=").append(createTime);
         sb.append(", updateTime=").append(updateTime);
         sb.append(", sellId=").append(sellId);
+        sb.append(", totalnum=").append(totalnum);
         sb.append(", serialVersionUID=").append(serialVersionUID);
         sb.append("]");
         return sb.toString();

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.nchu.wechatOrder.mapper.ex.OrderMasterMapperEx" >
+  <resultMap id="BaseResultMap" type="com.nchu.wechatOrder.domain.DO.OrderMaster" >
+    <id column="order_id" property="orderId" jdbcType="VARCHAR" />
+    <result column="buyer_address" property="buyerAddress" jdbcType="VARCHAR" />
+    <result column="buyer_openid" property="buyerOpenid" jdbcType="VARCHAR" />
+    <result column="order_amount" property="orderAmount" jdbcType="DECIMAL" />
+    <result column="order_status" property="orderStatus" jdbcType="TINYINT" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+    <result column="sell_id" property="sellId" jdbcType="VARCHAR" />
+    <result column="totalNum" property="totalnum" jdbcType="INTEGER" />
+  </resultMap>
+
+
+
+  <select id="selectByOpenId" resultMap="BaseResultMap" >
+    select order_id, buyer_address, buyer_openid, order_amount, order_status, create_time, 
+    update_time, sell_id, totalNum
+    from order_master where  buyer_openid=#{openId} and order_status=#{payStatus}
+     limit #{currPage},#{PageSize}
+  </select>
+
+  <select id="selectCountByPageAndOpenId" resultType="Integer" >
+    select count(1)
+    from order_master where  buyer_openid=#{openId} and order_status=#{payStatus}
+  </select>
+
+</mapper>

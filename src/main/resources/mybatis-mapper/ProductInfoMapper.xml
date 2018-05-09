@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.nchu.wechatOrder.mapper.ProductInfoMapper" >
   <resultMap id="BaseResultMap" type="com.nchu.wechatOrder.domain.DO.ProductInfo" >
-    <id column="product_id" property="productId" jdbcType="INTEGER" />
+    <id column="product_id" property="productId" jdbcType="VARCHAR" />
     <result column="product_name" property="productName" jdbcType="VARCHAR" />
     <result column="product_price" property="productPrice" jdbcType="DECIMAL" />
     <result column="product_stock" property="productStock" jdbcType="INTEGER" />
@@ -14,12 +14,12 @@
     <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
     <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
   </resultMap>
-  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
     delete from product_info
-    where product_id = #{productId,jdbcType=INTEGER}
+    where product_id = #{productId,jdbcType=VARCHAR}
   </delete>
   <insert id="insert" parameterType="com.nchu.wechatOrder.domain.DO.ProductInfo" >
-    <selectKey resultType="java.lang.Integer" keyProperty="productId" order="AFTER" >
+    <selectKey resultType="java.lang.String" keyProperty="productId" order="AFTER" >
       SELECT LAST_INSERT_ID()
     </selectKey>
     insert into product_info (product_name, product_price, product_stock, 
@@ -43,13 +43,13 @@
       category_type = #{categoryType,jdbcType=INTEGER},
       create_time = #{createTime,jdbcType=TIMESTAMP},
       update_time = #{updateTime,jdbcType=TIMESTAMP}
-    where product_id = #{productId,jdbcType=INTEGER}
+    where product_id = #{productId,jdbcType=VARCHAR}
   </update>
-  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
     select product_id, product_name, product_price, product_stock, product_description, 
     product_icon, product_status, sell_id, category_type, create_time, update_time
     from product_info
-    where product_id = #{productId,jdbcType=INTEGER}
+    where product_id = #{productId,jdbcType=VARCHAR}
   </select>
   <select id="selectAll" resultMap="BaseResultMap" >
     select product_id, product_name, product_price, product_stock, product_description, 

@@ -10,21 +10,19 @@
     <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
     <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
     <result column="sell_id" property="sellId" jdbcType="VARCHAR" />
+    <result column="totalNum" property="totalnum" jdbcType="INTEGER" />
   </resultMap>
   <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
     delete from order_master
     where order_id = #{orderId,jdbcType=VARCHAR}
   </delete>
   <insert id="insert" parameterType="com.nchu.wechatOrder.domain.DO.OrderMaster" >
-    <selectKey resultType="java.lang.String" keyProperty="orderId" order="AFTER" >
-      SELECT LAST_INSERT_ID()
-    </selectKey>
-    insert into order_master (buyer_address, buyer_openid, order_amount, 
+    insert into order_master (order_id ,buyer_address, buyer_openid, order_amount,
       order_status, create_time, update_time, 
-      sell_id)
-    values (#{buyerAddress,jdbcType=VARCHAR}, #{buyerOpenid,jdbcType=VARCHAR}, #{orderAmount,jdbcType=DECIMAL}, 
+      sell_id, totalNum)
+    values (#{orderId,jdbcType=VARCHAR},#{buyerAddress,jdbcType=VARCHAR}, #{buyerOpenid,jdbcType=VARCHAR}, #{orderAmount,jdbcType=DECIMAL},
       #{orderStatus,jdbcType=TINYINT}, #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}, 
-      #{sellId,jdbcType=VARCHAR})
+      #{sellId,jdbcType=VARCHAR}, #{totalnum,jdbcType=INTEGER})
   </insert>
   <update id="updateByPrimaryKey" parameterType="com.nchu.wechatOrder.domain.DO.OrderMaster" >
     update order_master
@@ -34,18 +32,19 @@
       order_status = #{orderStatus,jdbcType=TINYINT},
       create_time = #{createTime,jdbcType=TIMESTAMP},
       update_time = #{updateTime,jdbcType=TIMESTAMP},
-      sell_id = #{sellId,jdbcType=VARCHAR}
+      sell_id = #{sellId,jdbcType=VARCHAR},
+      totalNum = #{totalnum,jdbcType=INTEGER}
     where order_id = #{orderId,jdbcType=VARCHAR}
   </update>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
     select order_id, buyer_address, buyer_openid, order_amount, order_status, create_time, 
-    update_time, sell_id
+    update_time, sell_id, totalNum
     from order_master
     where order_id = #{orderId,jdbcType=VARCHAR}
   </select>
   <select id="selectAll" resultMap="BaseResultMap" >
     select order_id, buyer_address, buyer_openid, order_amount, order_status, create_time, 
-    update_time, sell_id
+    update_time, sell_id, totalNum
     from order_master
   </select>
 </mapper>
