@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="fragment/Selllayout">
+<!-- layout文件路径-->
+
+<head>
+     <title>后台登陆页面</title>
+
+
+</head>
+
+
+<body>
+<div layout:fragment="content">
+
+
+
+
+    <div class="container">
+
+        <div class="row">
+            <div class="col-lg-4 col-lg-offset-4">
+                <form class="form-signin" method="post" action="/user/doLogin">
+                    <p style="text-align: center">欢迎商家登陆</p>
+                    <label for="no" class="sr-only">账号</label>
+                    <input  id="no" name="uNo" class="form-control" placeholder="请输入账号" required autofocus>
+                    &nbsp;
+                    <label for="inputPassword" class="sr-only">Password</label>
+                    <input type="password"  name="password" id="inputPassword" class="form-control" placeholder="Password">
+                    &nbsp;
+                    <button class="btn btn-sm btn-primary btn-block" type="submit">登陆</button>&nbsp;
+                    <a class="btn btn-sm btn-primary btn-block" href="/sign">注册</a>
+                </form>
+            </div>
+        </div> <!-- /container -->
+
+
+    </div>
+</div>
+
+</body>
+
+</html>
