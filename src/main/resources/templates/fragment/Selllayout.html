@@ -39,35 +39,7 @@
                     </a>
                 </li>
                 <li>
-                    <a th:href="@{/index}"><i class="fa fa-fw fa-home"></i>历史订单记录</a>
-                </li>
-
-                <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-fw fa-plus"></i> 订单管理 </a>
-                    <ul  class="dropdown-menu" role="menu">
-                        <li>
-                            <a th:href="@{/orderCar}">
-                                待接单
-                            </a>
-                        </li>
-                        <li>
-                            <a th:href="@{/orderCar}">
-                            待退款
-                            </a>
-                        </li>
-                        <li>
-                            <a th:href="@{/orderCar}">
-                                已接单
-                            </a>
-                        </li>
-                        <li>
-                            <a th:href="@{/orderCar}">
-                                已退款
-                            </a>
-                        </li>
-
-
-                    </ul>
+                    <a th:href="@{/AllOrderRecord}"><i class="fa fa-fw fa-home"></i>商家接单</a>
                 </li>
 
 
@@ -75,13 +47,8 @@
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-fw fa-plus"></i> 菜品管理 </a>
                     <ul  class="dropdown-menu" role="menu">
                         <li>
-                            <a th:href="@{/orderCar}">
-                                已上架菜品
-                            </a>
-                        </li>
-                        <li>
-                            <a th:href="@{/orderCar}">
-                                已下架菜品
+                            <a th:href="@{/product/productAdmin}">
+                                菜品管理
                             </a>
                         </li>
                         <li>
@@ -90,7 +57,7 @@
                             </a>
                         </li>
                         <li>
-                            <a th:href="@{/orderCar}">
+                            <a th:href="@{/product/ToUploadProduc}">
                                上传新菜品
                             </a>
                         </li>

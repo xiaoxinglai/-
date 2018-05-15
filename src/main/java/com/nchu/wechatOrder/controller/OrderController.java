@@ -1,5 +1,6 @@
 package com.nchu.wechatOrder.controller;
 
+import com.nchu.wechatOrder.domain.DO.SellerInfo;
 import com.nchu.wechatOrder.domain.Result.Result;
 import com.nchu.wechatOrder.domain.VO.BaseInfo;
 import com.nchu.wechatOrder.domain.VO.PageResult;
@@ -19,6 +20,19 @@ public class OrderController {
 
     @Autowired
     private OrderService orderService;
+
+
+    /**
+     * 进入后台订单明细界面
+     */
+    @RequestMapping(value = "/toOrderDetail", method = RequestMethod.GET)
+    public String toOrderDetail(Model model) {
+
+
+        return "/OrderDetail";
+    }
+
+
 
     /**
      * 处理加入购物车
@@ -225,6 +239,44 @@ public class OrderController {
     }
 
 
+
+    //商家接单
+    @RequestMapping(value = "/AcceptOrder", method = RequestMethod.GET)
+    @ResponseBody
+    public Integer AcceptOrder(@RequestParam(value = "OrderId", required=false) String OrderId,HttpSession session) {
+
+        // BaseInfo baseInfo=(BaseInfo)session.getAttribute("baseInfo");
+
+        Result result=orderService.AcceptOrder(OrderId);
+
+        //成功则返回1 否则返回-1
+        if (result.getSuccess()){
+            return 1;
+        }else {
+            return -1;
+        }
+    }
+
+
+
+    //商家退款
+    @RequestMapping(value = "/SellPayBack", method = RequestMethod.GET)
+    @ResponseBody
+    public Integer SellPayBack(@RequestParam(value = "OrderId", required=false) String OrderId,HttpSession session) {
+
+         BaseInfo baseInfo=(BaseInfo)session.getAttribute("baseInfo");
+
+        Result result=orderService.SellPayBack(OrderId);
+
+        //成功则返回1 否则返回-1
+        if (result.getSuccess()){
+            return 1;
+        }else {
+            return -1;
+        }
+    }
+
+
     /**
      * 确认下单
      * @return
@@ -252,6 +304,48 @@ public class OrderController {
     }
 
 
+    /**
+     * 进入商家历史订单记录
+     */
+    @RequestMapping(value = "/AllOrderRecord", method = RequestMethod.GET)
+    public String AllOrderRecord(HttpSession session,Model model) {
 
+        SellerInfo user=(SellerInfo)session.getAttribute("User");
+        if (user==null){
+            return "redirect:/login";
+        }
+
+        return "/admin/AllOrderRecord";
+    }
+
+
+    //根据条件获取商家的所有的订单带分页
+    @RequestMapping(value = "/orderCar/sell", method = RequestMethod.GET)
+    @ResponseBody
+    public Object orderCarSell(@RequestParam(value = "currPage", required=false) Integer currPage,String condition,String start,String end,HttpSession session) {
+
+        if (condition.equals("undefined")||condition.equals("")){
+            condition=null;
+        }
+        if (start.equals("undefined")||start.equals("")){
+            start=null;
+        }
+        if (end.equals("undefined")||end.equals("")){
+            end=null;
+        }
+        System.out.println(condition+start+end);
+        if (ObjectUtils.isEmpty(currPage)){
+            currPage=1;
+        }
+        SellerInfo user=(SellerInfo)session.getAttribute("User");
+        if (user==null){
+            return "redirect:/login";
+        }
+        // BaseInfo baseInfo=new BaseInfo("一楼2号桌","abcdef","1");
+
+        PageResult pageResult=orderService.queryOrderCarBySell(currPage,user.getSellId(),condition,start,end);
+
+        return pageResult;
+    }
 
 }

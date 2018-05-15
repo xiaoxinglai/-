@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
-      layout:decorator="fragment/Selllayout">
+      layout:decorator="fragment/layUIAdmin">
 <!-- layout文件路径-->
 
 <head>
@@ -24,8 +24,10 @@
                 <form class="form-signin" method="post" action="/user/doLogin">
                     <p style="text-align: center">欢迎商家登陆</p>
                     <label for="no" class="sr-only">账号</label>
-                    <input  id="no" name="uNo" class="form-control" placeholder="请输入账号" required autofocus>
+                    <input  id="no" name="userCount" class="form-control" placeholder="请输入账号" required autofocus>
                     &nbsp;
+                    <td  th:if="${msg!=NullPointerException}"><p th:text="${msg}">description</p></td>
+
                     <label for="inputPassword" class="sr-only">Password</label>
                     <input type="password"  name="password" id="inputPassword" class="form-control" placeholder="Password">
                     &nbsp;

@@ -2,6 +2,7 @@ package com.nchu.wechatOrder.service.imp;
 
 import com.nchu.wechatOrder.domain.DO.ProductCategory;
 import com.nchu.wechatOrder.domain.DO.ProductInfo;
+import com.nchu.wechatOrder.domain.Result.Result;
 import com.nchu.wechatOrder.domain.VO.PageResult;
 import com.nchu.wechatOrder.mapper.ex.ProductCategoryMapperEx;
 import com.nchu.wechatOrder.mapper.ex.ProductInfoMapperEx;
@@ -48,6 +49,26 @@ public class ProductServiceImpl implements IProductService {
     }
 
     /**
+     * 查询指定商家下的所有菜品类型带分页
+     * @param SellId
+     * @return
+     */
+    @Override
+    public PageResult<ProductCategory> queryProductTypePage(String SellId) {
+
+
+       List<ProductCategory> productCategories= productCategoryMapperEx.selectBySellId(SellId);
+        PageResult pageResult=new PageResult();
+        pageResult.setSuccess(Boolean.TRUE);
+        pageResult.setCode(0);
+        pageResult.setData(productCategories);
+       Integer count= productCategoryMapperEx.CountBySellId(SellId);
+        pageResult.setCount(count);
+
+        return pageResult;
+    }
+
+    /**
      *查询所有菜品按照商家和菜品类型
      * @param currentPage
      * @param TypeId
@@ -61,5 +82,33 @@ public class ProductServiceImpl implements IProductService {
 
         return PageResult.Create(productInfos, currentPage, totalSize/PageResult.pageSize+1);
 
+    }
+
+    /**
+     * 根据条件查询商家的所有菜品
+     * @param currentPage
+     * @param name
+     * @param TypeId
+     * @param sellId
+     * @return
+     */
+    @Override
+    public PageResult<ProductInfo> queryProductByCondition(Integer currentPage, String name, Integer TypeId, String sellId,Integer Status) {
+
+        List<ProductInfo> productInfos = productInfoMapperEx.selectByPageAndsellIdAndTypeIdAndName((currentPage - 1) * PageResult.pageSize, PageResult.pageSize,name,sellId,TypeId,Status);
+        Integer totalSize= productInfoMapperEx.selectCountByPageAndsellIdAndTypeIdAndName(sellId,name,TypeId,Status);
+
+
+        return PageResult.Create(productInfos, currentPage, totalSize/PageResult.pageSize+1);
+
+    }
+
+    @Override
+    public Result UpOrDownProduct(String ProductId, Integer status) {
+
+        ProductInfo productInfo=productInfoMapperEx.selectByPrimaryKey(ProductId);
+        productInfo.setProductStatus(status.byteValue());
+        productInfoMapperEx.updateByPrimaryKey(productInfo);
+        return Result.Create();
     }
 }

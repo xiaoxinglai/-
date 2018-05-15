@@ -72,7 +72,7 @@
 
                                 for (var i = 0; i < data.data.length; i++) {
                                     var status="";
-                                    if (data.data[i].orderMaster.orderStatus==3){
+                                    if (data.data[i].orderMaster.orderStatus==4){
                                         status="商家已确认接单";
                                     }
 
@@ -80,7 +80,7 @@
                                     $("#tab").append(
 
                                         '<div style="color: #1abc9c" class="row">'+
-                                        '<h5 style="display: inline-block"><p class="text-center">'+data.data[i].orderMaster.buyerAddress+'&nbsp;'+'总价:<span style="color: red;" id=sumCost'+data.data[i].orderMaster.orderId+'>'+data.data[i].orderMaster.orderAmount+'</span></p></h5><span style="display: inline-block;margin-top:12px;"   class="disabled btn btn-danger pull-right btn-sm">申请退款</span>'
+                                        '<h5 style="display: inline-block"><p class="text-center">'+data.data[i].orderMaster.buyerAddress+'&nbsp;'+'总价:<span style="color: red;" id=sumCost'+data.data[i].orderMaster.orderId+'>'+data.data[i].orderMaster.orderAmount+'</span><span> 下单时间:'+timestampToTime(data.data[i].orderMaster.createTime)+'</span></p></h5><span style="display: inline-block;margin-top:12px;"   class="disabled btn btn-danger pull-right btn-sm">申请退款</span>'
                                         +'<div class="text-center">'+"订单号:"+data.data[i].orderMaster.orderId+'</div>'+
                                         '<div class="row" id=list'+data.data[i].orderMaster.orderId+'></div>'
                                         + '<span   class="disabled btn btn-info  btn-block ">'+status+'</span>'
@@ -124,6 +124,17 @@
 
                 });
 
+                //计算时间戳
+                function timestampToTime(timestamp) {
+                    var date = new Date(timestamp);//时间戳为10位需*1000，时间戳为13位的话不需乘1000
+                    Y = date.getFullYear() + '-';
+                    M = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1) + '-';
+                    D = date.getDate() + ' ';
+                    h = date.getHours() + ':';
+                    m = date.getMinutes() + ':';
+                    s = date.getSeconds();
+                    return Y+M+D+h+m+s;
+                }
 
                 /*]]>*/
             </script>

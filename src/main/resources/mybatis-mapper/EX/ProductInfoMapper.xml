@@ -15,15 +15,29 @@
     <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
   </resultMap>
 
+  <insert id="insertAll" parameterType="com.nchu.wechatOrder.domain.DO.ProductInfo" >
+
+    insert into product_info (product_id,product_name, product_price, product_stock,
+    product_description, product_icon, product_status,
+    sell_id, category_type, create_time,
+    update_time)
+    values (#{productId,jdbcType=VARCHAR},#{productName,jdbcType=VARCHAR}, #{productPrice,jdbcType=DECIMAL}, #{productStock,jdbcType=INTEGER},
+    #{productDescription,jdbcType=VARCHAR}, #{productIcon,jdbcType=VARCHAR}, #{productStatus,jdbcType=TINYINT},
+    #{sellId,jdbcType=VARCHAR}, #{categoryType,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP},
+    #{updateTime,jdbcType=TIMESTAMP})
+  </insert>
+
+
+
   <select id="selectByPageAndsellIdAndTypeId" resultMap="BaseResultMap" >
     select product_id, product_name, product_price, product_stock, product_description,
     product_icon, product_status, sell_id, category_type, create_time, update_time
-    from product_info where sell_id=#{sellId} and category_type=#{TypeId} limit #{currentPage},#{pageSize}
+    from product_info where sell_id=#{sellId} and category_type=#{TypeId} and product_status =1 limit #{currentPage},#{pageSize}
   </select>
 
   <select id="selectCountByPageAndsellIdAndTypeId" resultType="Integer" >
     select count(1)
-    from product_info where sell_id=#{sellId} and category_type=#{TypeId}
+    from product_info where sell_id=#{sellId} and category_type=#{TypeId} and product_status =1
   </select>
 
 
@@ -31,12 +45,47 @@
   <select id="selectByPageAndsellId" resultMap="BaseResultMap" >
     select product_id, product_name, product_price, product_stock, product_description,
     product_icon, product_status, sell_id, category_type, create_time, update_time
-    from product_info where sell_id=#{sellId}  limit #{currentPage},#{pageSize}
+    from product_info where sell_id=#{sellId} and product_status =1  limit #{currentPage},#{pageSize}
   </select>
 
   <select id="selectCountByPageAndsellId" resultType="Integer" >
     select count(1)
+    from product_info where sell_id=#{sellId} and product_status =1
+  </select>
+
+
+  <select id="selectByPageAndsellIdAndTypeIdAndName" resultMap="BaseResultMap" >
+    select product_id, product_name, product_price, product_stock, product_description,
+    product_icon, product_status, sell_id, category_type, create_time, update_time
     from product_info where sell_id=#{sellId}
+    <if test="name!=null">
+      and product_name like "%"#{name}"%"
+    </if>
+    <if test="TypeId!=null">
+      and category_type=#{TypeId}
+    </if>
+    <if test="Status!=null">
+      and product_status=#{Status}
+    </if>
+
+     limit #{currentPage},#{pageSize}
+  </select>
+
+  <select id="selectCountByPageAndsellIdAndTypeIdAndName" resultType="Integer" >
+    select count(1)
+    from product_info where sell_id=#{sellId}
+    <if test="name!=null">
+      and product_name like "%"#{name}"%"
+    </if>
+    <if test="TypeId!=null">
+      and category_type=#{TypeId}
+    </if>
+
+    <if test="Status!=null">
+      and product_status=#{Status}
+    </if>
+
+
   </select>
 
 

@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="fragment/layUIAdmin">
+<!-- layout文件路径-->
+
+<head>
+    <title>上传新菜品</title>
+
+
+</head>
+
+
+<body>
+<div layout:fragment="content">
+
+
+    <p class="text-center">上传新菜品</p>
+    <form id="addproduct">
+    <div class="row">
+        <div class="col-xs-2 col-xs-offset-1">
+
+            <div class="layui-upload">
+                <button type="button" class="layui-btn" id="test1">上传菜品照片</button>
+                <div class="layui-upload-list" style="width: 120px;height: 120px;background-color: azure;">
+                    <img class="layui-upload-img"  width="120px" height="120px" id="demo1">
+                    <p id="demoText"></p>
+                </div>
+                <input id="Icon" type="hidden" name="productIcon" />
+            </div>
+
+        </div>
+
+        <div class="col-xs-7">
+            <div class="row">
+                <div class="col-xs-4">
+                    <p>请输入菜名:</p>
+                </div>
+                <div class="col-xs-8">
+                    <input name="productName" class="form-control"/>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xs-4">
+                    <p>请输入单价:</p>
+                </div>
+                <div class="col-xs-8">
+                    <input name="productPrice" class="form-control"/>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xs-4">
+                    <p>请输入库存:</p>
+                </div>
+                <div class="col-xs-8">
+                    <input name="productStock" class="form-control"/>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xs-4">
+                    <p>请输入描述:</p>
+                </div>
+                <div class="col-xs-8">
+                    <input name="productDescription" class="form-control"/>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xs-4">
+                    <p>是否上架:</p>
+                </div>
+                <div class="col-xs-8">
+                    <select  class="form-control" name="productStatus">
+                        <option value="1">是</option>
+                        <option value="0">否</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xs-4">
+                    <p>菜品类型:</p>
+                </div>
+                <div class="col-xs-8">
+                    <select id="Type" class="form-control" name="categoryType">
+                        <option selected></option>
+                    </select>
+                </div>
+                <script>
+                    /*<![CDATA[*/
+                    //获取该商家的菜类型列表
+                    $.ajax({
+                        url: "/product/queryProductType",
+                        type: "get",
+                        success: function (data) {
+
+
+                            for (var i = 0; i < data.length; i++) {
+
+                                $("#Type").append(
+                                    '<option value='+data[i].categoryType+'>'+data[i].categoryName+'</option>'
+                                )
+
+                            }
+
+
+
+                        }})
+
+                    /*]]>*/
+                </script>
+            </div>
+
+            <div class="row">
+                <div class="col-xs-4">
+
+                </div>
+                <div class="col-xs-8">
+                    <button onclick="addForm()" class="btn btn-info btn-block">提交</button>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    </form>
+    <script>
+
+        layui.use('upload', function () {
+            var upload = layui.upload;
+//普通图片上传
+            var uploadInst = upload.render({
+                elem: '#test1'
+                , url: '/product/upload'
+                , before: function (obj) {
+                    //预读本地文件示例，不支持ie8
+                    obj.preview(function (index, file, result) {
+                        $('#demo1').attr('src', result); //图片链接（base64）
+                    });
+                }
+                , done: function (res) {
+                    //如果上传失败
+                    if (res.code > 0) {
+                        return layer.msg('上传失败');
+                    }
+                    //上传成功
+                    $('#Icon').val(res.src);
+                }
+                , error: function () {
+                    //演示失败状态，并实现重传
+                    var demoText = $('#demoText');
+                    demoText.html('<span style="color: #FF5722;">上传失败</span> <a class="layui-btn layui-btn-mini demo-reload">重试</a>');
+                    demoText.find('.demo-reload').on('click', function () {
+                        uploadInst.upload();
+                    });
+                }
+            });
+        })
+
+
+
+        function addForm(){
+
+            var fd =  JSON.stringify($('#addproduct').serializeJSON());
+
+            console.log(fd);
+            $.ajax({
+                url: "/product/doUploadProduct",
+                type: "POST",
+                dataType: "json",//预期服务器返回的数据类型
+                contentType:"application/json",
+                data:fd  ,  //data表示要发送的数据
+                processData: false,  // 不处理数据
+                success: function (data) { //返回json结果
+                    if (data==1) {
+                        alert("添加成功");
+                    }else{
+                        alert("添加失败,请重试且注意输入框不能为空");
+                    }
+
+
+                }
+            });
+        }
+    </script>
+
+
+</div>
+
+</div>
+</div>
+
+</body>
+
+</html>

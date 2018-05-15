@@ -11,6 +11,19 @@ public class PageResult<T> {
     private Integer currentPage;
     private Integer totalCount;
     public static  final Integer pageSize=6;
+    private Integer count;
+
+    public static Integer getPageSize() {
+        return pageSize;
+    }
+
+    public Integer getCount() {
+        return count;
+    }
+
+    public void setCount(Integer count) {
+        this.count = count;
+    }
 
     private Integer code;
     private String msg;

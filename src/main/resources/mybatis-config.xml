@@ -17,6 +17,7 @@
         <mapper resource="mybatis-mapper/EX/OrderDetailMapper.xml"/>
         <mapper resource="mybatis-mapper/EX/OrderMasterMapper.xml"/>
         <mapper resource="mybatis-mapper/EX/ProductCategoryMapper.xml"/>
+        <mapper resource="mybatis-mapper/EX/SellerInfoMapper.xml"/>
 
 
 

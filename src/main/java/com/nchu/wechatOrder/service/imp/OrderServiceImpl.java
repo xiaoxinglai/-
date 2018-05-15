@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -91,7 +92,7 @@ public class OrderServiceImpl implements OrderService {
         orderMaster.setOrderId(orderId);
         orderMaster.setCreateTime(new Date());
         orderMaster.setUpdateTime(new Date());
-        masterMapper.insert(orderMaster);
+
 
         //插入订单详情表
 
@@ -109,21 +110,15 @@ public class OrderServiceImpl implements OrderService {
             Integer num = OrderMap.get(productInfo.getProductId());
             orderDetail.setProductQuantity(num);
             orderDetail.setUpdateTime(new Date());
-            //todo 减去库存
-            Integer nowStockNum = productInfo.getProductStock() - num;
-            if (nowStockNum > 0) {
-                productInfo.setProductStock(nowStockNum);
-                productInfoMapperEx.updateByPrimaryKey(productInfo);
-            } else {
-                return Result.Create(-1, "库存不足");
-            }
+
 
             //插入详情表
             orderDetailMapper.insert(orderDetail);
 
 
         }
-
+        //插入订单
+        masterMapper.insert(orderMaster);
 
         return Result.Create();
     }
@@ -142,6 +137,43 @@ public class OrderServiceImpl implements OrderService {
         return queryOrderBystatus(currPage, baseInfo, OrderEnum.NO_Pay.getCode());
 
     }
+
+    /**
+     * 获取指定商家的订单信息
+     * @param currPage
+     * @param SellId
+     * @return
+     */
+    @Override
+    public PageResult queryOrderCarBySell(Integer currPage, String SellId, String OrderId, String start, String end) {
+
+        SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//小写的mm表示的是分钟
+
+        Date stime=null;
+        Date etime=null;
+         try {
+             if (start!=null){
+                 start=start+" 00:00:00";
+                 stime=sdf.parse(start);
+                 System.out.println(stime);
+             }
+             if (end!=null){
+                 end=end+" 23:59:59";
+                 etime=sdf.parse(end);
+                 System.out.println(etime);
+             }
+
+         }catch (Exception ex){
+
+             System.out.println(ex.toString());
+         }
+
+
+
+
+        return querySellOrderBystatus(currPage,SellId,OrderId,stime,etime);
+    }
+
 
     /**
      * 获取指定用户的已支付订单信息
@@ -189,6 +221,9 @@ public class OrderServiceImpl implements OrderService {
     }
 
 
+
+
+
     /**
      * 根据订单状态查询用户的所有订单
      */
@@ -203,6 +238,41 @@ public class OrderServiceImpl implements OrderService {
         if (orderMasters == null || orderMasters.size() == 0) {
             return PageResult.Create(null, currPage, totalSize / 2 + 1);
         }
+
+
+         List<OrderVO> orderVOS= getOrderVO(orderMasters);
+
+
+        return PageResult.Create(orderVOS, currPage, totalSize / 2 + 1);
+    }
+
+    /**
+     * 根据商家ID查询其所有订单
+     */
+    private PageResult querySellOrderBystatus(Integer currPage, String sellId,String orderId,Date stime,Date etime) {
+        //获取该用户的购物车订单  根据用户id和订单状态为0  且分页 每页2个订单
+        List<OrderMaster> orderMasters = masterMapper.selectBySellId((currPage - 1) * 6, 6, sellId, orderId, stime, etime);
+
+        //获取该用户的总订单数
+        Integer totalSize = masterMapper.selectCountByPageAndSellId(sellId, orderId, stime, etime);
+
+
+        if (orderMasters == null || orderMasters.size() == 0) {
+            return PageResult.Create(null, currPage, totalSize / 6 + 1);
+        }
+
+
+        List<OrderVO> orderVOS= getOrderVO(orderMasters);
+
+
+        return PageResult.Create(orderVOS, currPage, totalSize / 6 + 1);
+    }
+
+
+    /**
+     * 构建订单列表
+     */
+    private List<OrderVO>  getOrderVO( List<OrderMaster> orderMasters){
 
         //获取所有的订单id
         List<String> OrderIds = orderMasters.stream().map(x -> x.getOrderId()).collect(Collectors.toList());
@@ -235,10 +305,9 @@ public class OrderServiceImpl implements OrderService {
             orderVOS.add(orderVO);
         }
 
+        return orderVOS;
 
-        return PageResult.Create(orderVOS, currPage, totalSize / 2 + 1);
     }
-
 
     /**
      * 取消订单
@@ -325,10 +394,42 @@ public class OrderServiceImpl implements OrderService {
 
     }
 
+    /**
+     * 用户付款时候减去库存
+     */
+    private int subStock(String OrderId){
 
+        List<OrderDetail> orderDetailList = orderDetailMapper.selectByOrderId(OrderId);
+        List<String> ProductIds = orderDetailList.stream().map(x -> x.getProductId()).collect(Collectors.toList());
+        List<ProductInfo> productInfos = productInfoMapperEx.selectByProductIds(ProductIds);
+
+
+        Map<String,ProductInfo> productInfoMap=new HashMap<>();
+        for (ProductInfo productInfo : productInfos) {
+            productInfoMap.put(productInfo.getProductId(),productInfo);
+        }
+
+
+
+        for (OrderDetail orderDetail : orderDetailList) {
+            ProductInfo productInfo=productInfoMap.get(orderDetail.getProductId());
+            Integer nowStockNum=productInfo.getProductStock()-orderDetail.getProductQuantity();
+            if(nowStockNum<=0){ //小于0 说明库存不足
+                return -1;
+            }
+            productInfo.setProductStock(nowStockNum);
+            //更新库存
+            productInfoMapperEx.updateByPrimaryKey(productInfo);
+
+
+        }
+
+        return 1;
+
+    }
 
     /**
-     * 用户确认订单
+     * 用户确认订单 表示付款
      *
      * @param sureOrderVO
      * @return
@@ -338,6 +439,11 @@ public class OrderServiceImpl implements OrderService {
     public Result<Boolean> SureOrder(SureOrderVO sureOrderVO) {
 
         String OrderId = sureOrderVO.getOrderId();
+
+        //减去库存
+        if (subStock(OrderId)<0){
+            Result.Create(-1,"库存不足");
+        }
 
         //查询订单信息
         OrderMaster orderMaster = masterMapper.selectByPrimaryKey(OrderId);
@@ -417,5 +523,40 @@ public class OrderServiceImpl implements OrderService {
 
 
         return Result.Create();
+    }
+
+    /**
+     * 商家接单
+     * @param OrderId
+     * @return
+     */
+    @Override
+    public Result<Boolean> AcceptOrder(String OrderId) {
+        //更改订单状态为申请退款中
+        OrderMaster orderMaster= masterMapper.selectByPrimaryKey(OrderId);
+        Byte status=OrderEnum.SURE_ORDER.getCode().byteValue();
+        orderMaster.setOrderStatus(status);
+        masterMapper.updateByPrimaryKey(orderMaster);
+
+        return Result.Create();
+
+    }
+
+    /**
+     * 商家退款
+     * @param OrderId
+     * @return
+     */
+    @Override
+    public Result<Boolean> SellPayBack(String OrderId) {
+        //加库存
+        addStock(OrderId);
+        OrderMaster orderMaster= masterMapper.selectByPrimaryKey(OrderId);
+        Byte status=OrderEnum.PAYBACK.getCode().byteValue();
+        orderMaster.setOrderStatus(status);
+        masterMapper.updateByPrimaryKey(orderMaster);
+
+        return Result.Create();
+
     }
 }

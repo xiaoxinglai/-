@@ -13,6 +13,8 @@ public interface OrderService {
     Result<Boolean> toOrderCar(Map<String,Integer> OrderMap, BaseInfo baseInfo);
     //获取指定用户的购物车信息
     PageResult queryOrderCarByUser(Integer currPage, BaseInfo baseInfo);
+    //获取指定商家的所有订单信息
+    PageResult queryOrderCarBySell(Integer currPage, String SellId,String OrderId,String start,String end);
     //获取指定用户的订单信息
     PageResult queryUserOrderByUser(Integer currPage, BaseInfo baseInfo);
     //获取指定用户的待退款订单信息
@@ -34,4 +36,8 @@ public interface OrderService {
     //确认订单
     Result<Boolean> SureOrder(SureOrderVO sureOrderVO);
 
+    //商家退款
+    Result<Boolean> AcceptOrder(String OrderId);
+    //商家接单
+    Result<Boolean> SellPayBack(String OrderId);
 }

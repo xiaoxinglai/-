@@ -9,8 +9,8 @@ import java.util.List;
 @Mapper
 public interface ProductCategoryMapperEx  extends ProductCategoryMapper {
 
-
+    int insertAll(ProductCategory record);
     List<ProductCategory> selectBySellId(String SellId);
-
+    Integer CountBySellId(String SellId);
 
 }
