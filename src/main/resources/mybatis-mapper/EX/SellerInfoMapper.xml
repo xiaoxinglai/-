@@ -21,4 +21,18 @@
     where user_count = #{no}
   </select>
 
+
+  <select id="querySellBypage" resultMap="BaseResultMap"  >
+    select sell_id, username, `password`, create_time, update_time, address, descript,
+    `state`, user_count
+    from seller_info
+    where `state` = #{Status}  or `state`=0
+  </select>
+
+  <select id="CountBySellBypage" resultMap="BaseResultMap"  >
+    select count(1)
+    from seller_info
+    where `state` = #{Status} or `state`=0
+  </select>
+
 </mapper>

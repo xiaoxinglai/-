@@ -3,12 +3,15 @@ package com.nchu.wechatOrder.controller;
 import com.nchu.wechatOrder.domain.DO.SellerInfo;
 import com.nchu.wechatOrder.domain.Enum.UserEnum;
 import com.nchu.wechatOrder.domain.Result.BizResult;
+import com.nchu.wechatOrder.mapper.ex.SellerInfoMapperEx;
 import com.nchu.wechatOrder.service.ISellService;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpSession;
 
@@ -17,6 +20,8 @@ public class AdminController {
 
     @Autowired
     private ISellService sellService;
+    @Autowired
+    private SellerInfoMapperEx sellerInfoMapper;
 
 
     /**
@@ -32,6 +37,25 @@ public class AdminController {
 
         return "/admin/login";
     }
+    /**
+     * 进入超级管理员页面
+     *
+     * @param
+     * @param
+     * @param
+     * @return
+     */
+    @RequestMapping(value = "/AdminUSer", method = RequestMethod.GET)
+    public String AdminUSer(HttpSession session) {
+
+        SellerInfo user = (SellerInfo) session.getAttribute("User");
+        if (user==null||user.getState()!=UserEnum.ADMIN.getCode().byteValue()){
+            return "redirect:login";
+        }
+
+        return "admin/AdminUser";
+    }
+
 
     /**
      * 处理登陆请求
@@ -49,7 +73,7 @@ public class AdminController {
             session.setAttribute("User", bizResult.getDate());
             SellerInfo resultDate = bizResult.getDate();
             if (resultDate.getState().equals(UserEnum.ADMIN.getCode().byteValue())) {
-               return "admin/AdminUser";
+                return "redirect:/AdminUSer";
             }
 
 
@@ -71,5 +95,41 @@ public class AdminController {
 
     }
 
+
+    /**
+     * 查询所有商家的信息带分页
+     */
+    @RequestMapping(value = "/querySellBypage", method = RequestMethod.GET)
+    @ResponseBody
+    public Object querySellBypage(HttpSession session) {
+
+        SellerInfo user = (SellerInfo) session.getAttribute("User");
+        if (user==null||user.getState()!=UserEnum.ADMIN.getCode().byteValue()){
+            return "redirect:login";
+        }
+
+
+        return sellService.querySellBypage(UserEnum.USER.getCode().byteValue());
+
+    }
+
+    /**
+     * 更改商家状态
+     */
+    @RequestMapping(value = "/changeState", method = RequestMethod.GET)
+    @ResponseBody
+    public Integer changeState(@Param("SellId") String SellId,@Param("State") Integer State, HttpSession session) {
+
+        SellerInfo user = (SellerInfo) session.getAttribute("User");
+        if (user==null||user.getState()!=UserEnum.ADMIN.getCode().byteValue()){
+            return -1;
+        }
+
+
+       SellerInfo sellerInfo= sellerInfoMapper.selectByPrimaryKey(SellId);
+        sellerInfo.setState(State.byteValue());
+        return  sellerInfoMapper.updateByPrimaryKey(sellerInfo);
+
+    }
 
 }
