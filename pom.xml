@@ -6,6 +6,11 @@
     <groupId>com.nchu</groupId>
     <artifactId>demo</artifactId>
     <version>0.0.1-SNAPSHOT</version>
+    <modules>
+        <module>wechatOrder-Order-Service</module>
+        <module>wechatOrder-Order-Api</module>
+        <module>wechatOrder-Order-Commom</module>
+    </modules>
 
     <packaging>pom</packaging>
 
