@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.Date;
 
 public class SellerInfo implements Serializable {
+    private static final long serialVersionUID = 4327171841751252435L;
+
     private String sellId;
 
     private String username;
@@ -22,7 +24,6 @@ public class SellerInfo implements Serializable {
 
     private String userCount;
 
-    private static final long serialVersionUID = 1L;
 
     public String getSellId() {
         return sellId;
