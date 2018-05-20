@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.nchu.mapper.ex.OrderDetailMapperEx" >
+  <resultMap id="BaseResultMap" type="com.nchu.pojo.DO.OrderDetail" >
+    <id column="detail_id" property="detailId" jdbcType="VARCHAR" />
+    <result column="order_id" property="orderId" jdbcType="VARCHAR" />
+    <result column="product_id" property="productId" jdbcType="VARCHAR" />
+    <result column="product_name" property="productName" jdbcType="VARCHAR" />
+    <result column="product_price" property="productPrice" jdbcType="DECIMAL" />
+    <result column="product_quantity" property="productQuantity" jdbcType="INTEGER" />
+    <result column="product_icon" property="productIcon" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+
+
+  <select id="selectByOrderId" resultMap="BaseResultMap" parameterType="String" >
+    select detail_id, order_id, product_id, product_name, product_price, product_quantity,
+    product_icon, create_time, update_time
+    from order_detail where order_id =#{OrderIds}
+  </select>
+
+  <select id="selectByOrderIds" resultMap="BaseResultMap" parameterType="java.util.List" >
+    select detail_id, order_id, product_id, product_name, product_price, product_quantity, 
+    product_icon, create_time, update_time
+    from order_detail where order_id in
+    <foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+      #{item}
+    </foreach>
+  </select>
+
+  <select id="selectByDetailIds" resultMap="BaseResultMap" parameterType="java.util.List" >
+    select detail_id, order_id, product_id, product_name, product_price, product_quantity,
+    product_icon, create_time, update_time
+    from order_detail where detail_id in
+    <foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+      #{item}
+    </foreach>
+  </select>
+
+  <delete id="deleteByOrderId" parameterType="java.lang.String" >
+    delete from order_detail
+    where order_id = #{orderId,jdbcType=VARCHAR}
+  </delete>
+
+</mapper>
