@@ -1,4 +1,1 @@
-com/nchu/order/VO/SureOrderVO.class
-com/nchu/order/orderservice/OrderService.class
-com/nchu/order/VO/OrderVO.class
 com/nchu/order/orderservice/imp/OrderServiceImpl.class

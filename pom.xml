@@ -7,13 +7,11 @@
     <artifactId>wechatOrder</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <modules>
-        <module>wechatOrder-common</module>
-        <module>wechatOrder-mapper</module>
-        <module>wechatOrder-pojo</module>
-        <module>wechatOrder-service-product</module>
+
         <module>wechatOrder-service-order</module>
-        <module>wechatOrder-mybatisGenerater</module>
-        <module>wechatOrder-web</module>
+        <module>wechatOrder-Provider</module>
+        <module>wechat-Order-service-order-api</module>
+
     </modules>
 
     <packaging>pom</packaging>
@@ -38,6 +36,31 @@
     </properties>
 
     <dependencies>
+        <!-- zk 客户端依赖 -->
+        <dependency>
+            <groupId>org.apache.zookeeper</groupId>
+            <artifactId>zookeeper</artifactId>
+            <version>3.4.11</version>
+
+            <exclusions>
+                <exclusion>
+                    <artifactId>log4j</artifactId>
+                    <groupId>log4j</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>slf4j-log4j12</artifactId>
+                    <groupId>org.slf4j</groupId>
+                </exclusion>
+            </exclusions>
+
+
+        </dependency>
+        <dependency>
+            <groupId>com.github.sgroschupf</groupId>
+            <artifactId>zkclient</artifactId>
+            <version>0.1</version>
+        </dependency>
+
 
 
         <dependency>
@@ -116,8 +139,51 @@
             <version>1.9.22</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>dubbo</artifactId>
+            <version>2.5.3</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework</groupId>
+                    <artifactId>spring</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
 
 
+        <!--自己项目的依赖-->
+
+            <dependency>
+                <groupId>com.nchu</groupId>
+                <artifactId>wechatOrder-pojo</artifactId>
+                <version>0.0.1-SNAPSHOT</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.nchu</groupId>
+                <artifactId>wechatOrder-common</artifactId>
+                <version>0.0.4-SNAPSHOT</version>
+            </dependency>
+
+<!--日志框架-->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.5</version>
+        </dependency>
+
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.1.8</version>
+        </dependency>
+
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-core</artifactId>
+            <version>1.1.8</version>
+        </dependency>
 
     </dependencies>
 

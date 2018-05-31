@@ -1,22 +1,24 @@
 package com.nchu.order.orderservice.imp;
 
-import com.nchu.pojo.DO.OrderDetail;
-import com.nchu.pojo.DO.OrderMaster;
-import com.nchu.pojo.DO.ProductInfo;
+
+import com.nchu.common.Enum.OrderEnum;
 import com.nchu.common.Form.BaseInfo;
 import com.nchu.common.Result.PageResult;
 import com.nchu.common.Result.Result;
-import com.nchu.order.VO.OrderVO;
-import com.nchu.order.VO.SureOrderVO;
-import com.nchu.common.Enum.OrderEnum;
+import com.nchu.common.utils.KeyUtil;
+import com.nchu.common.utils.RedisLock;
 import com.nchu.mapper.ex.OrderDetailMapperEx;
 import com.nchu.mapper.ex.OrderMasterMapperEx;
 import com.nchu.mapper.ex.ProductInfoMapperEx;
+import com.nchu.order.VO.OrderVO;
+import com.nchu.order.VO.SureOrderVO;
 import com.nchu.order.orderservice.OrderService;
+import com.nchu.pojo.DO.OrderDetail;
+import com.nchu.pojo.DO.OrderMaster;
+import com.nchu.pojo.DO.ProductInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.nchu.common.utils.KeyUtil;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
@@ -33,6 +35,9 @@ public class OrderServiceImpl implements OrderService {
 
     @Autowired
     private ProductInfoMapperEx productInfoMapperEx;
+
+    @Autowired
+    private RedisLock redisLock;
 
 
     /**
@@ -140,6 +145,7 @@ public class OrderServiceImpl implements OrderService {
 
     /**
      * 获取指定商家的订单信息
+     *
      * @param currPage
      * @param SellId
      * @return
@@ -147,31 +153,29 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public PageResult queryOrderCarBySell(Integer currPage, String SellId, String OrderId, String start, String end) {
 
-        SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//小写的mm表示的是分钟
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//小写的mm表示的是分钟
 
-        Date stime=null;
-        Date etime=null;
-         try {
-             if (start!=null){
-                 start=start+" 00:00:00";
-                 stime=sdf.parse(start);
-                 System.out.println(stime);
-             }
-             if (end!=null){
-                 end=end+" 23:59:59";
-                 etime=sdf.parse(end);
-                 System.out.println(etime);
-             }
+        Date stime = null;
+        Date etime = null;
+        try {
+            if (start != null) {
+                start = start + " 00:00:00";
+                stime = sdf.parse(start);
+                System.out.println(stime);
+            }
+            if (end != null) {
+                end = end + " 23:59:59";
+                etime = sdf.parse(end);
+                System.out.println(etime);
+            }
 
-         }catch (Exception ex){
+        } catch (Exception ex) {
 
-             System.out.println(ex.toString());
-         }
-
-
+            System.out.println(ex.toString());
+        }
 
 
-        return querySellOrderBystatus(currPage,SellId,OrderId,stime,etime);
+        return querySellOrderBystatus(currPage, SellId, OrderId, stime, etime);
     }
 
 
@@ -189,6 +193,7 @@ public class OrderServiceImpl implements OrderService {
 
     /**
      * 获取指定用户的待退款订单信息
+     *
      * @param currPage
      * @param baseInfo
      * @return
@@ -200,6 +205,7 @@ public class OrderServiceImpl implements OrderService {
 
     /**
      * 获取指定用户的已经退款完成订单信息
+     *
      * @param currPage
      * @param baseInfo
      * @return
@@ -211,6 +217,7 @@ public class OrderServiceImpl implements OrderService {
 
     /**
      * 获取指定用户的商家已接单的订单信息
+     *
      * @param currPage
      * @param baseInfo
      * @return
@@ -219,9 +226,6 @@ public class OrderServiceImpl implements OrderService {
     public PageResult QuerySureOrder(Integer currPage, BaseInfo baseInfo) {
         return queryOrderBystatus(currPage, baseInfo, OrderEnum.SURE_ORDER.getCode());
     }
-
-
-
 
 
     /**
@@ -240,7 +244,7 @@ public class OrderServiceImpl implements OrderService {
         }
 
 
-         List<OrderVO> orderVOS= getOrderVO(orderMasters);
+        List<OrderVO> orderVOS = getOrderVO(orderMasters);
 
 
         return PageResult.Create(orderVOS, currPage, totalSize / 2 + 1);
@@ -249,7 +253,7 @@ public class OrderServiceImpl implements OrderService {
     /**
      * 根据商家ID查询其所有订单
      */
-    private PageResult querySellOrderBystatus(Integer currPage, String sellId,String orderId,Date stime,Date etime) {
+    private PageResult querySellOrderBystatus(Integer currPage, String sellId, String orderId, Date stime, Date etime) {
         //获取该用户的购物车订单  根据用户id和订单状态为0  且分页 每页2个订单
         List<OrderMaster> orderMasters = masterMapper.selectBySellId((currPage - 1) * 6, 6, sellId, orderId, stime, etime);
 
@@ -262,7 +266,7 @@ public class OrderServiceImpl implements OrderService {
         }
 
 
-        List<OrderVO> orderVOS= getOrderVO(orderMasters);
+        List<OrderVO> orderVOS = getOrderVO(orderMasters);
 
 
         return PageResult.Create(orderVOS, currPage, totalSize / 6 + 1);
@@ -272,7 +276,7 @@ public class OrderServiceImpl implements OrderService {
     /**
      * 构建订单列表
      */
-    private List<OrderVO>  getOrderVO( List<OrderMaster> orderMasters){
+    private List<OrderVO> getOrderVO(List<OrderMaster> orderMasters) {
 
         //获取所有的订单id
         List<String> OrderIds = orderMasters.stream().map(x -> x.getOrderId()).collect(Collectors.toList());
@@ -331,6 +335,7 @@ public class OrderServiceImpl implements OrderService {
 
     /**
      * 申请退款
+     *
      * @param OrderId
      * @return
      */
@@ -338,9 +343,9 @@ public class OrderServiceImpl implements OrderService {
     public Result<Boolean> applyPayBack(String OrderId) {
 
         //更改订单状态为申请退款中
-       OrderMaster orderMaster= masterMapper.selectByPrimaryKey(OrderId);
-       Byte status=OrderEnum.APPLY_PAYBACK.getCode().byteValue();
-       orderMaster.setOrderStatus(status);
+        OrderMaster orderMaster = masterMapper.selectByPrimaryKey(OrderId);
+        Byte status = OrderEnum.APPLY_PAYBACK.getCode().byteValue();
+        orderMaster.setOrderStatus(status);
         masterMapper.updateByPrimaryKey(orderMaster);
 
         return Result.Create();
@@ -348,14 +353,15 @@ public class OrderServiceImpl implements OrderService {
 
     /**
      * 取消申请退款
+     *
      * @param OrderId
      * @return
      */
     @Override
     public Result<Boolean> CancelapplyPayBack(String OrderId) {
         //更改订单状态从申请退款变更为已支付
-        OrderMaster orderMaster= masterMapper.selectByPrimaryKey(OrderId);
-        Byte status=OrderEnum.Pay.getCode().byteValue();
+        OrderMaster orderMaster = masterMapper.selectByPrimaryKey(OrderId);
+        Byte status = OrderEnum.Pay.getCode().byteValue();
         orderMaster.setOrderStatus(status);
         masterMapper.updateByPrimaryKey(orderMaster);
 
@@ -367,29 +373,27 @@ public class OrderServiceImpl implements OrderService {
     /**
      * 退款和取消订单时候增加库存
      */
-    private void addStock(String OrderId){
+    private void addStock(String OrderId) {
 
         List<OrderDetail> orderDetailList = orderDetailMapper.selectByOrderId(OrderId);
         List<String> ProductIds = orderDetailList.stream().map(x -> x.getProductId()).collect(Collectors.toList());
         List<ProductInfo> productInfos = productInfoMapperEx.selectByProductIds(ProductIds);
 
 
-        Map<String,ProductInfo> productInfoMap=new HashMap<>();
+        Map<String, ProductInfo> productInfoMap = new HashMap<>();
         for (ProductInfo productInfo : productInfos) {
-            productInfoMap.put(productInfo.getProductId(),productInfo);
+            productInfoMap.put(productInfo.getProductId(), productInfo);
         }
 
 
-
         for (OrderDetail orderDetail : orderDetailList) {
-            ProductInfo productInfo=productInfoMap.get(orderDetail.getProductId());
-            Integer nowStockNum=productInfo.getProductStock()+orderDetail.getProductQuantity();
+            ProductInfo productInfo = productInfoMap.get(orderDetail.getProductId());
+            Integer nowStockNum = productInfo.getProductStock() + orderDetail.getProductQuantity();
             productInfo.setProductStock(nowStockNum);
             //更新库存
             productInfoMapperEx.updateByPrimaryKey(productInfo);
 
         }
-
 
 
     }
@@ -397,32 +401,35 @@ public class OrderServiceImpl implements OrderService {
     /**
      * 用户付款时候减去库存
      */
-    private int subStock(String OrderId){
-
+    private int subStock(String OrderId) {
         List<OrderDetail> orderDetailList = orderDetailMapper.selectByOrderId(OrderId);
         List<String> ProductIds = orderDetailList.stream().map(x -> x.getProductId()).collect(Collectors.toList());
-        List<ProductInfo> productInfos = productInfoMapperEx.selectByProductIds(ProductIds);
 
+        Map<String, OrderDetail> productIdAndOrderDetail = new HashMap<>();
+        orderDetailList.forEach(x -> productIdAndOrderDetail.put(x.getProductId(), x));
 
-        Map<String,ProductInfo> productInfoMap=new HashMap<>();
-        for (ProductInfo productInfo : productInfos) {
-            productInfoMap.put(productInfo.getProductId(),productInfo);
-        }
+        for (String id : ProductIds) {
+            //todo 分布式锁 加锁
+            Long currentDate = System.currentTimeMillis() + 5000; //设置加锁时间
+            Boolean result = redisLock.lock(id, currentDate.toString());
+            //不成功重试
+            while (!result) {
+                currentDate = System.currentTimeMillis() + 5000; //设置加锁时间
+                result = redisLock.lock(id, currentDate.toString());
+            }
 
-
-
-        for (OrderDetail orderDetail : orderDetailList) {
-            ProductInfo productInfo=productInfoMap.get(orderDetail.getProductId());
-            Integer nowStockNum=productInfo.getProductStock()-orderDetail.getProductQuantity();
-            if(nowStockNum<=0){ //小于0 说明库存不足
+            ProductInfo productInfo = productInfoMapperEx.selectByPrimaryKey(id);
+            OrderDetail orderDetail=productIdAndOrderDetail.get(id);
+            Integer nowStockNum = productInfo.getProductStock() - orderDetail.getProductQuantity();
+            if (nowStockNum <= 0) { //小于0 说明库存不足
                 return -1;
             }
             productInfo.setProductStock(nowStockNum);
             //更新库存
             productInfoMapperEx.updateByPrimaryKey(productInfo);
-
-
+            redisLock.unlock(id, currentDate.toString());
         }
+
 
         return 1;
 
@@ -440,10 +447,12 @@ public class OrderServiceImpl implements OrderService {
 
         String OrderId = sureOrderVO.getOrderId();
 
+
         //减去库存
-        if (subStock(OrderId)<0){
-            Result.Create(-1,"库存不足");
+        if (subStock(OrderId) < 0) {
+            Result.Create(-1, "库存不足");
         }
+
 
         //查询订单信息
         OrderMaster orderMaster = masterMapper.selectByPrimaryKey(OrderId);
@@ -527,14 +536,15 @@ public class OrderServiceImpl implements OrderService {
 
     /**
      * 商家接单
+     *
      * @param OrderId
      * @return
      */
     @Override
     public Result<Boolean> AcceptOrder(String OrderId) {
         //更改订单状态为申请退款中
-        OrderMaster orderMaster= masterMapper.selectByPrimaryKey(OrderId);
-        Byte status=OrderEnum.SURE_ORDER.getCode().byteValue();
+        OrderMaster orderMaster = masterMapper.selectByPrimaryKey(OrderId);
+        Byte status = OrderEnum.SURE_ORDER.getCode().byteValue();
         orderMaster.setOrderStatus(status);
         masterMapper.updateByPrimaryKey(orderMaster);
 
@@ -544,6 +554,7 @@ public class OrderServiceImpl implements OrderService {
 
     /**
      * 商家退款
+     *
      * @param OrderId
      * @return
      */
@@ -551,12 +562,17 @@ public class OrderServiceImpl implements OrderService {
     public Result<Boolean> SellPayBack(String OrderId) {
         //加库存
         addStock(OrderId);
-        OrderMaster orderMaster= masterMapper.selectByPrimaryKey(OrderId);
-        Byte status=OrderEnum.PAYBACK.getCode().byteValue();
+        OrderMaster orderMaster = masterMapper.selectByPrimaryKey(OrderId);
+        Byte status = OrderEnum.PAYBACK.getCode().byteValue();
         orderMaster.setOrderStatus(status);
         masterMapper.updateByPrimaryKey(orderMaster);
 
         return Result.Create();
 
+    }
+
+    @Override
+    public String dubboTest() {
+        return "我是dubbo测试接口，来着order";
     }
 }
