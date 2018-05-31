@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="fragment/layUIAdmin">
+<!-- layout文件路径-->
+
+<head>
+    <title>商家后台管理</title>
+
+
+</head>
+
+
+<body>
+<div layout:fragment="content">
+
+    <div class="container">
+
+        <h5><p class="text-center">所有订单检索</p></h5>
+
+        <div style="margin: 5px;">
+            <div class="row">
+                <div class="col-xs-1"><p>订单号</p></div>
+                <div class="col-xs-3"><input id="orderNum" class="form-control"/></div>
+                <div class="col-xs-1"><p class="pull-right">开始</p></div>
+                <script>
+                    layui.use('laydate', function(){
+                        var laydate = layui.laydate;
+                    //执行一个laydate实例
+                    laydate.render({
+                        elem: '#selectDateS', //指定元素
+
+                    });
+
+                    laydate.render({
+                        elem: '#selectDateE', //指定元素
+
+                    });
+                    });
+
+                </script>
+                <div class="col-xs-2"><input id="selectDateS" class="form-control"/></div>
+                <div class="col-xs-1"><p class="pull-right">结束</p></div>
+                <div class="col-xs-2"><input id="selectDateE" class="form-control"/></div>
+                <div class="col-xs-2">
+                    <button type="button" onclick="seacher()" class="btn btn-info">检索</button>
+                </div>
+            </div>
+
+            <div class="row" id="tab">
+
+
+            </div>
+
+            <ul class="pagination" id="pagination1"><!--分页导航 pagination  &laquo;箭头图标-->
+
+            </ul>
+
+            <script type="text/javascript" th:src="@{/js/jqPaginator.js}"></script>
+
+            <script type="text/javascript" th:inline="javascript">
+                /*<![CDATA[*/
+
+                //计算时间戳
+                function timestampToTime(timestamp) {
+                    var date = new Date(timestamp);//时间戳为10位需*1000，时间戳为13位的话不需乘1000
+                    Y = date.getFullYear() + '-';
+                    M = (date.getMonth() + 1 < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1) + '-';
+                    D = date.getDate() + ' ';
+                    h = date.getHours() + ':';
+                    m = date.getMinutes() + ':';
+                    s = date.getSeconds();
+                    return Y + M + D + h + m + s;
+                }
+
+
+                function page(condition, start, end) {
+                    $.jqPaginator('#pagination1', {
+                        totalPages: 4,
+                        visiblePages: 4,
+                        currentPage: 1,
+                        prev: '<li class="prev"><a href="javascript:;">Previous</a></li>',
+                        next: '<li class="next"><a href="javascript:;">Next</a></li>',
+                        page: '<li class="page"><a href="javascript:;">{{page}}</a></li>',
+
+                        onPageChange: function (num, type) {
+                            $.ajax({
+                                url: "/orderCar/sell?currPage=" + num + "&condition=" + condition + "&start=" + start + "&end=" + end,
+                                type: "get",
+                                success: function (data) {
+
+                                    $('#pagination1').jqPaginator('option', {
+                                        currentPage: data.currentPage,
+                                        totalPages: data.totalCount
+                                    });
+
+
+                                    $("#tab").html('<div></div>');
+
+
+                                    for (var i = 0; i < data.data.length; i++) {
+
+                                        var status = "";
+                                        if (data.data[i].orderMaster.orderStatus == 4) {
+                                            status = "已确认接单";
+                                        }
+                                        if (data.data[i].orderMaster.orderStatus == 2) {
+                                            status = "申请退款";
+                                        }
+                                        if (data.data[i].orderMaster.orderStatus == 1) {
+                                            status = "待处理";
+                                        }
+                                        if (data.data[i].orderMaster.orderStatus == 3) {
+                                            status = "未支付";
+                                        }
+                                        if (data.data[i].orderMaster.orderStatus == 5) {
+                                            status = "已退款";
+                                        }
+
+
+                                        $("#tab").append(
+                                            '<div style="color: #1abc9c" class="row">' +
+                                            '<h5 style="display: inline-block"><p class="text-center">' + data.data[i].orderMaster.buyerAddress + '&nbsp;' + '总价:<span style="color: red;" id=sumCost' + data.data[i].orderMaster.orderId + '>' + data.data[i].orderMaster.orderAmount + '</span><span> 下单时间:' + timestampToTime(data.data[i].orderMaster.createTime) + '</span></p></h5><button id=OrderStatus' + data.data[i].orderMaster.orderId + ' style="display: inline-block;margin-top:12px;"   class="btn  pull-right btn-sm ">' + status + '</button>'
+                                            + '<div class="text-center">' + "订单号:" + data.data[i].orderMaster.orderId + '</div>' +
+                                            '<div class="row" id=list' + data.data[i].orderMaster.orderId + '></div>'
+
+                                            + '</div>'
+                                        )
+
+                                        if (data.data[i].orderMaster.orderStatus == 4) {
+                                            $("#OrderStatus" + data.data[i].orderMaster.orderId).addClass("disabled");
+                                        }
+                                        if (data.data[i].orderMaster.orderStatus == 2) {
+                                            var action = "SellPayBack('" + data.data[i].orderMaster.orderId + "')";
+
+
+                                            $("#OrderStatus" + data.data[i].orderMaster.orderId).attr("onclick", action);
+
+                                            $("#OrderStatus" + data.data[i].orderMaster.orderId).addClass("btn-info");
+
+
+                                        }
+                                        if (data.data[i].orderMaster.orderStatus == 1) {
+                                            var action = "AcceptOrder('" + data.data[i].orderMaster.orderId + "')";
+
+
+                                            $("#OrderStatus" + data.data[i].orderMaster.orderId).attr("onclick",action);
+
+                                            $("#OrderStatus" + data.data[i].orderMaster.orderId).addClass("btn-danger");
+                                        }
+                                        if (data.data[i].orderMaster.orderStatus == 3) {
+
+                                            $("#OrderStatus" + data.data[i].orderMaster.orderId).addClass("disabled");
+                                        }
+                                        if (data.data[i].orderMaster.orderStatus == 5) {
+
+                                            $("#OrderStatus" + data.data[i].orderMaster.orderId).addClass("disabled");
+                                        }
+
+                                        for (var j = 0; j < data.data[i].orderDetailList.length; j++) {
+                                            $("#list" + data.data[i].orderMaster.orderId).append(
+                                                '<div class="container">' +
+                                                '<div style="text-align:center;color: #1abc9c" class="row">' +
+
+                                                '<div  class="col-xs-3">' + '<img  style="width: 80px;height: 60px;" src=\"' + data.data[i].orderDetailList[j].productIcon + '\" alt=\"' + data.data[i].orderDetailList[j].productName + '\"class=\"img-thumbnail\" /></div>' +
+                                                '<div class="col-xs-3">' + data.data[i].orderDetailList[j].productName + "¥" + '<span id=price' + data.data[i].orderDetailList[j].detailId + ' style="color: red;font-style: italic;">' + data.data[i].orderDetailList[j].productPrice + '</span></div>' +
+                                                '<div class="col-xs-3">' + '数量:<span style="color: red">' + data.data[i].orderDetailList[j].productQuantity + '</span></div>' +
+                                                '<div class="col-xs-3">' + '总价:¥<span style="color: red" id=totalPrice' + data.data[i].orderDetailList[j].detailId + '>' + data.data[i].orderDetailList[j].productQuantity * data.data[i].orderDetailList[j].productPrice + '</span></div>'
+                                                + '</div>'
+                                            )
+
+
+                                        }
+
+
+                                    }
+
+
+                                }
+                            });
+
+
+                        }
+
+
+                    });
+                }
+
+                //页面加载之后 加载分页
+                window.onload = function () {
+
+                    page();
+                }
+
+
+                function seacher() {
+
+                    var start = $("#selectDateS").val();
+                    var end = $("#selectDateE").val();
+                    var condition = $("#orderNum").val();
+                    if (condition == null||condition=='') {
+                        page(condition, start, end);
+                    } else {
+                        //当填了订单之后  时间值清空
+                        page(condition, '', '');
+                        $("#selectDateS").val('');
+                        $("#selectDateE").val('');
+                    }
+
+
+                }
+
+
+                //商家操作退款
+                function SellPayBack(OrderId) {
+                    $.ajax({
+                        url: "/SellPayBack?OrderId=" + OrderId,
+                        type: "get",
+                        dataType: "json",//预期服务器返回的数据类型
+                        contentType: "application/json",
+                        success: function (data) {
+                            if (data == 1) {
+                                alert("提交成功");
+                                window.location.reload();
+                            }
+                        }
+                    });
+
+                }
+
+                //商家操作接单
+                function AcceptOrder(OrderId) {
+                    $.ajax({
+                        url: "/AcceptOrder?OrderId=" + OrderId,
+                        type: "get",
+                        dataType: "json",//预期服务器返回的数据类型
+                        contentType: "application/json",
+                        success: function (data) {
+                            if (data == 1) {
+                                alert("提交成功");
+                                window.location.reload();
+                            }
+                        }
+                    });
+
+                }
+
+                /*]]>*/
+            </script>
+
+        </div>
+
+
+    </div>
+</div>
+
+</body>
+
+</html>

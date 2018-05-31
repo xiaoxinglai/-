@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="fragment/layUISurperAdmin">
+<!-- layout文件路径-->
+
+<head>
+    <title>超级管理员页面</title>
+
+
+</head>
+
+
+<body>
+<div layout:fragment="content">
+    <div class="container">
+
+        <table id="demo" lay-filter="test"></table>
+
+        <script type="text/html" id="switchTpl">
+            <!-- 这里的 checked 的状态只是演示 -->
+            <input type="checkbox" name="state" value="{{d.sellId}}" lay-skin="switch" lay-text="认证|未认证" lay-filter="state" {{ d.state == 1 ? 'checked' : '' }}>
+        </script>
+
+        <script>
+
+
+
+
+            /*<![CDATA[*/
+            layui.use('table', function () {
+                var table = layui.table;
+            form = layui.form;
+
+                //第一个实例
+                table.render({
+                    elem: '#demo',
+                    width: 950
+                    , url: '/querySellBypage' //数据接口
+                    , page: true //开启分页
+                    , cols: [[ //表头
+                        {field: 'username', title: '用户名', width: 200, sort: true, fixed: 'left'}
+                        , {field: 'userCount', title: '账号', width: 200,event: 'setCategoryName', style:'cursor: pointer;'}
+                        , {field: 'descript', title: '备注', width: 200, sort: true}
+                        , {field: 'address', title: '地址', width: 200, sort: true}
+
+                        ,{field:'state', title:'是否认证', width:150, templet: '#switchTpl', unresize: true}
+
+                    ]]
+                });
+
+                //监听改变状态操作
+                form.on('switch(state)', function(obj){
+
+                    var state;
+                    if (obj.elem.checked==true){
+
+                      state= 1;
+                    }else{
+                      state= 0
+                    }
+
+                    $.ajax({
+                        url: "/changeState?SellId=" +obj.value+"&State="+state,
+                        type: "get",
+                        success: function (data) {
+                            if (data == 1) {
+                                alert("更新成功!");
+                            }
+
+
+                        }
+                    });
+
+
+
+
+
+                });
+
+
+
+                //监听工具条
+                table.on('tool(test)', function (obj) { //注：tool是工具条事件名，test是table原始容器的属性 lay-filter="对应的值"
+                    var data = obj.data; //获得当前行数据
+                    var layEvent = obj.event; //获得 lay-event 对应的值（也可以是表头的 event 参数对应的值）
+                    var tr = obj.tr; //获得当前行 tr 的DOM对象
+
+
+
+
+                    if (layEvent === 'detail') { //查看
+                        //do somehing
+                    } else if (layEvent === 'del') { //删除
+                        layer.confirm('真的删除行么', function (index) {
+                            obj.del(); //删除对应行（tr）的DOM结构，并更新缓存
+                            layer.close(index);
+                            //向服务端发送删除指令
+
+                            // alert(data.categoryId);
+                            $.ajax({
+                                url: "/product/DelProductType?categoryId=" + data.categoryId,
+                                type: "get",
+                                success: function (data) {
+                                    if (data == 1) {
+                                        alert("删除成功!");
+                                    }
+
+
+                                }
+                            });
+                        });
+                    } else if (layEvent === 'edit') { //编辑
+                        //do something
+
+                        //同步更新缓存对应的值
+                        obj.update({
+                            username: '123'
+                            , title: 'xxx'
+                        });
+                    }else if (layEvent==="setCategoryName"){
+                        layer.prompt({
+                            formType: 2
+                            ,title: '修改 ID 为 ['+ data.categoryId +'] 的菜品名字'
+                            ,value: data.categoryName
+                        }, function(value, index){
+                            layer.close(index);
+
+                            //这里一般是发送修改的Ajax请求
+                            $.ajax({
+                                url: "/product/UpdateProductType?categoryId=" + data.categoryId+"&categoryName="+value,
+                                type: "get",
+                                success: function (data) {
+                                    if (data == 1) {
+                                        alert("修改成功!");
+                                    }
+
+
+                                }
+                            });
+
+                            //同步更新表格和缓存对应的值
+                            obj.update({
+                                categoryName: value
+                            });
+
+                        })
+                    }
+
+                })});
+
+            /*]]>*/
+        </script>
+
+        <script type="text/html" id="barDemo">
+
+            <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+
+        </script>
+
+    </div>
+</div>
+
+</body>
+
+</html>

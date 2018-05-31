@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="fragment/layout">
+<!-- layout文件路径-->
+
+<head>
+     <title>商家已接单</title>
+
+
+</head>
+
+
+<body>
+<div layout:fragment="content">
+    <!--
+            作者：offline
+            时间：2017-03-28
+            描述：head begin
+        -->
+
+
+
+
+
+    <div class="container">
+
+
+
+        <h4 class="text-center">确认接单列表</h4>
+
+        <div style="margin: 5px;">
+
+            <div class="row" id="tab">
+
+
+            </div>
+
+
+
+
+                <ul class="pagination" id="pagination1"><!--分页导航 pagination  &laquo;箭头图标-->
+
+                </ul>
+
+            <script type="text/javascript" th:src="@{/js/jqPaginator.js}"></script>
+
+            <script type="text/javascript" th:inline="javascript">
+                /*<![CDATA[*/
+                $.jqPaginator('#pagination1', {
+                    totalPages: 4,
+                    visiblePages: 4,
+                    currentPage: 1,
+                    prev: '<li class="prev"><a href="javascript:;">Previous</a></li>',
+                    next: '<li class="next"><a href="javascript:;">Next</a></li>',
+                    page: '<li class="page"><a href="javascript:;">{{page}}</a></li>',
+
+                    onPageChange: function (num, type) {
+                        $.ajax({
+                            url: "/SureOrder?currPage=" + num,
+                            type: "get",
+                            success: function (data) {
+
+                                $('#pagination1').jqPaginator('option', {
+                                    currentPage: data.currentPage,
+                                    totalPages: data.totalCount
+                                });
+
+
+                                $("#tab").html('<div></div>');
+
+
+                                for (var i = 0; i < data.data.length; i++) {
+                                    var status="";
+                                    if (data.data[i].orderMaster.orderStatus==4){
+                                        status="商家已确认接单";
+                                    }
+
+
+                                    $("#tab").append(
+
+                                        '<div style="color: #1abc9c" class="row">'+
+                                        '<h5 style="display: inline-block"><p class="text-center">'+data.data[i].orderMaster.buyerAddress+'&nbsp;'+'总价:<span style="color: red;" id=sumCost'+data.data[i].orderMaster.orderId+'>'+data.data[i].orderMaster.orderAmount+'</span><span> 下单时间:'+timestampToTime(data.data[i].orderMaster.createTime)+'</span></p></h5><span style="display: inline-block;margin-top:12px;"   class="disabled btn btn-danger pull-right btn-sm">申请退款</span>'
+                                        +'<div class="text-center">'+"订单号:"+data.data[i].orderMaster.orderId+'</div>'+
+                                        '<div class="row" id=list'+data.data[i].orderMaster.orderId+'></div>'
+                                        + '<span   class="disabled btn btn-info  btn-block ">'+status+'</span>'
+
+                                        +'</div>'
+
+                                    )
+
+                                    for (var j = 0; j < data.data[i].orderDetailList.length; j++) {
+                                        $("#list"+data.data[i].orderMaster.orderId).append(
+                                            '<div class="container">'+
+                                            '<div style="text-align:center;color: #1abc9c" class="row">'+
+
+                                                '<div  class="col-xs-3">'+ '<img  style="width: 80px;height: 60px;" src=\"' + data.data[i].orderDetailList[j].productIcon + '\" alt=\"' + data.data[i].orderDetailList[j].productName + '\"class=\"img-thumbnail\" /></div>'+
+                                                '<div class="col-xs-3">'+ data.data[i].orderDetailList[j].productName +"¥"+'<span id=price'+data.data[i].orderDetailList[j].detailId+' style="color: red;font-style: italic;">'+data.data[i].orderDetailList[j].productPrice+'</span></div>'+
+                                                '<div class="col-xs-3">'+'数量:<span style="color: red">'+data.data[i].orderDetailList[j].productQuantity+'</span></div>'+
+                                              '<div class="col-xs-3">'+'总价:¥<span style="color: red" id=totalPrice'+data.data[i].orderDetailList[j].detailId+'>'+data.data[i].orderDetailList[j].productQuantity*data.data[i].orderDetailList[j].productPrice+'</span></div>'+
+
+                                             '</div>'+'<input id=num'+data.data[i].orderDetailList[j].detailId+' type="hidden" value="'+data.data[i].orderDetailList[j].productQuantity+'" >'
+
+                                            +'</div>'
+                                        )
+
+
+                                    }
+
+
+
+                                }
+
+
+
+
+
+                            }
+                        });
+
+
+                    }
+
+
+                });
+
+                //计算时间戳
+                function timestampToTime(timestamp) {
+                    var date = new Date(timestamp);//时间戳为10位需*1000，时间戳为13位的话不需乘1000
+                    Y = date.getFullYear() + '-';
+                    M = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1) + '-';
+                    D = date.getDate() + ' ';
+                    h = date.getHours() + ':';
+                    m = date.getMinutes() + ':';
+                    s = date.getSeconds();
+                    return Y+M+D+h+m+s;
+                }
+
+                /*]]>*/
+            </script>
+
+
+
+
+
+
+
+        </div>
+
+
+    </div>
+</div>
+
+</body>
+
+</html>

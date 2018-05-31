@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="fragment/layout">
+<!-- layout文件路径-->
+
+<head>
+     <title>我的购物车</title>
+
+
+</head>
+
+
+<body>
+<div layout:fragment="content">
+    <!--
+            作者：offline
+            时间：2017-03-28
+            描述：head begin
+        -->
+
+
+
+
+
+    <div class="container">
+
+
+
+        <h4 class="text-center">购物车页面</h4>
+
+        <div style="margin: 5px;">
+
+            <div class="row" id="tab">
+
+
+            </div>
+
+
+
+
+                <ul class="pagination" id="pagination1"><!--分页导航 pagination  &laquo;箭头图标-->
+
+                </ul>
+
+            <script type="text/javascript" th:src="@{/js/jqPaginator.js}"></script>
+
+            <script type="text/javascript" th:inline="javascript">
+                /*<![CDATA[*/
+                $.jqPaginator('#pagination1', {
+                    totalPages: 4,
+                    visiblePages: 4,
+                    currentPage: 1,
+                    prev: '<li class="prev"><a href="javascript:;">Previous</a></li>',
+                    next: '<li class="next"><a href="javascript:;">Next</a></li>',
+                    page: '<li class="page"><a href="javascript:;">{{page}}</a></li>',
+
+                    onPageChange: function (num, type) {
+                        $.ajax({
+                            url: "/orderCar/User?currPage=" + num,
+                            type: "get",
+                            success: function (data) {
+
+                                $('#pagination1').jqPaginator('option', {
+                                    currentPage: data.currentPage,
+                                    totalPages: data.totalCount
+                                });
+
+
+                                $("#tab").html('<div></div>');
+
+
+                                for (var i = 0; i < data.data.length; i++) {
+                                    $("#tab").append(
+
+
+                                        '<div style="color: #1abc9c" class="row">'+
+                                        '<h5 style="display: inline-block"><p class="text-center">'+data.data[i].orderMaster.buyerAddress+'&nbsp;'+'总价:<span style="color: red;" id=sumCost'+data.data[i].orderMaster.orderId+'>'+data.data[i].orderMaster.orderAmount+'</span><span> 下单时间:'+timestampToTime(data.data[i].orderMaster.createTime)+'</span></p></h5><button style="display: inline-block;margin-top:12px;" type="button"  onclick="cancelOrder(\''+data.data[i].orderMaster.orderId+'\')\"  class="btn btn-danger pull-right btn-sm">取消订单</button>'
+                                        +'<div class="text-center">'+"订单号:"+data.data[i].orderMaster.orderId+'</div>'+
+                                        '<div class="row" id=list'+data.data[i].orderMaster.orderId+'></div>'
+                                        + '<button type="button"   onclick="send(\''+data.data[i].orderMaster.orderId+'\')"  class="btn btn-danger  btn-block ">确认下单</button>'
+
+                                        +'</div>'
+
+                                    )
+
+                                    for (var j = 0; j < data.data[i].orderDetailList.length; j++) {
+                                        $("#list"+data.data[i].orderMaster.orderId).append(
+                                            '<div class="container">'+
+                                            '<div style="text-align:center;color: #1abc9c" class="row">'+
+
+                                                '<div  class="col-xs-3">'+ '<img  style="width: 80px;height: 60px;" src=\"' + data.data[i].orderDetailList[j].productIcon + '\" alt=\"' + data.data[i].orderDetailList[j].productName + '\"class=\"img-thumbnail\" /></div>'+
+                                                '<div class="col-xs-3">'+ data.data[i].orderDetailList[j].productName +"¥"+'<span id=price'+data.data[i].orderDetailList[j].detailId+' style="color: red;font-style: italic;">'+data.data[i].orderDetailList[j].productPrice+'</span></div>'+
+                                                '<div class="col-xs-3">'+'<span onclick=\"onPrice(\''+data.data[i].orderDetailList[j].detailId+'\''+',\''+data.data[i].orderMaster.orderId+'\')\"><input id="'+data.data[i].orderDetailList[j].detailId+'" style=\"width: 30px\" value=\"'+data.data[i].orderDetailList[j].productQuantity+ '\"class=\"Onspinner\" /></span></div>'+
+                                              '<div class="col-xs-3">'+'总价:¥<span style="color: red" id=totalPrice'+data.data[i].orderDetailList[j].detailId+'>'+data.data[i].orderDetailList[j].productQuantity*data.data[i].orderDetailList[j].productPrice+'</span></div>'+
+
+                                             '</div>'+'<input id=num'+data.data[i].orderDetailList[j].detailId+' type="hidden" value="'+data.data[i].orderDetailList[j].productQuantity+'" >'
+
+                                            +'</div>'
+                                        )
+
+
+                                    }
+
+
+
+                                }
+
+
+                                var spinner = $(".Onspinner").spinner();
+
+
+                                $(".Onspinner").spinner({
+                                    min: 0,
+                                    max: 2500,
+                                    step: 1,
+                                    start: 0,
+
+                                });
+
+
+                            }
+                        });
+
+
+                    }
+
+
+                });
+
+
+                /*]]>*/
+            </script>
+
+
+
+            <script>
+                /*<![CDATA[*/
+
+
+
+
+
+                var myMap=new Map();
+
+                //计算单件商品总价和订单总价
+                function onPrice(id,OrderId) {
+
+                    var oldNum=parseInt($("#num"+id).val());
+                    var num=parseInt($("#"+id).val());
+                    var sPrice=$("#price"+id).text();
+                    var price=parseInt(sPrice);
+                    var oldtotalPrice=parseInt($("#totalPrice"+id).text());
+
+                    var sumCost=parseInt($("#sumCost"+OrderId).text());
+                    var totalprice= num*price;
+
+
+
+                    if (oldNum!=num){
+
+                        if (totalprice < oldtotalPrice){
+                            sumCost=sumCost-price;
+                            $("#sumCost"+OrderId).text(sumCost);
+                        }else{
+                            sumCost=sumCost+price;
+                            $("#sumCost"+OrderId).text(sumCost);
+
+                        }
+                    }
+
+
+                    $("#totalPrice"+id).text(totalprice);
+                    $("#num"+id).val(num);
+
+                    myMap.set(id,num);
+
+                }
+
+                /*]]>*/
+            </script>
+
+
+            <script th:src="@{/js/jquery.serializejson.min.js}"></script>
+            <script>
+                //确认下单
+                
+                function send(OrderId) {
+
+                    var rebateMap = {};
+
+                    myMap.forEach(function (value, key, map){
+
+                        rebateMap[key] = value;
+                    })
+
+
+                    //构建对象
+                    OrderMast=new Object();
+                    OrderMast.orderId=OrderId;
+                    OrderMast.listMap=rebateMap;
+                    var  SureOrder=JSON.stringify(OrderMast);
+
+
+
+
+                    $.ajax({
+                        url: "/SureOrder",
+                        type: "POST",
+                        dataType: "json",//预期服务器返回的数据类型
+                        contentType:"application/json",
+                        data: SureOrder,
+                        success: function (data) {
+                            if (data==1){
+                                alert("提交成功");
+                                window.location.reload();
+                            }
+                        }});
+
+                }
+                
+
+
+
+
+                //取消订单
+                function cancelOrder(OrderId) {
+
+
+                    $.ajax({
+                        url: "/orderCar/Cancel?OrderId="+OrderId,
+                        type: "get",
+                        dataType: "json",//预期服务器返回的数据类型
+                        contentType:"application/json",
+                        success: function (data) {
+                            if (data==1){
+                                alert("提交成功");
+                                window.location.reload();
+                            }
+                        }});
+                    
+                }
+
+
+                //计算时间戳
+                function timestampToTime(timestamp) {
+                    var date = new Date(timestamp);//时间戳为10位需*1000，时间戳为13位的话不需乘1000
+                    Y = date.getFullYear() + '-';
+                    M = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1) + '-';
+                    D = date.getDate() + ' ';
+                    h = date.getHours() + ':';
+                    m = date.getMinutes() + ':';
+                    s = date.getSeconds();
+                    return Y+M+D+h+m+s;
+                }
+
+            </script>
+
+
+        </div>
+
+
+    </div>
+</div>
+
+</body>
+
+</html>

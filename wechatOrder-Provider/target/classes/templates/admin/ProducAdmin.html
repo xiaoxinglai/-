@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="fragment/layUIAdmin">
+<!-- layout文件路径-->
+
+<head>
+    <title>商家后台管理</title>
+
+
+</head>
+
+
+<body>
+<div layout:fragment="content">
+    <script src="/laydate/laydate.js" th:src="@{/laydate/laydate.js}"></script> <!-- 改成你的路径 -->
+    <div class="container">
+
+        <h5><p class="text-center">菜品管理</p></h5>
+
+        <div style="margin: 5px;">
+            <div class="row">
+                <div class="col-xs-1"><p>菜名</p></div>
+                <div class="col-xs-3"><input id="orderNum" class="form-control"/></div>
+                <div class="col-xs-1"><p class="pull-right">类型</p></div>
+                <div class="col-xs-2"><select id="selectDateS" class="form-control">
+                    <option selected></option>
+                </select></div>
+                <div class="col-xs-1"><p>上/下架</p></div>
+                <div class="col-xs-2"><select id="Status" class="form-control">
+                    <option selected></option>
+                    <option value="1">已上架</option>
+                    <option value="0">已下架</option>
+                </select></div>
+                <div class="col-xs-2">
+                    <button type="button" onclick="seacher()" class="btn btn-info">检索</button>
+                </div>
+            </div>
+
+            <div class="row" id="tab">
+
+
+            </div>
+
+            <ul class="pagination" id="pagination1"><!--分页导航 pagination  &laquo;箭头图标-->
+
+            </ul>
+
+            <script type="text/javascript" th:src="@{/js/jqPaginator.js}"></script>
+
+            <script type="text/javascript" th:inline="javascript">
+
+
+                /*<![CDATA[*/
+
+                //计算时间戳
+                function timestampToTime(timestamp) {
+                    var date = new Date(timestamp);//时间戳为10位需*1000，时间戳为13位的话不需乘1000
+                    Y = date.getFullYear() + '-';
+                    M = (date.getMonth() + 1 < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1) + '-';
+                    D = date.getDate() + ' ';
+                    h = date.getHours() + ':';
+                    m = date.getMinutes() + ':';
+                    s = date.getSeconds();
+                    return Y + M + D + h + m + s;
+                }
+
+
+                function page(typeId, name, Status) {
+
+
+                    $.jqPaginator('#pagination1', {
+                        totalPages: 4,
+                        visiblePages: 4,
+                        currentPage: 1,
+                        prev: '<li class="prev"><a href="javascript:;">Previous</a></li>',
+                        next: '<li class="next"><a href="javascript:;">Next</a></li>',
+                        page: '<li class="page"><a href="javascript:;">{{page}}</a></li>',
+
+                        onPageChange: function (num, type) {
+                            $.ajax({
+                                url: "/product/queryProductByCondition?currPage=" + num + "&name=" + name + "&typeId=" + typeId + "&Status=" + Status,
+                                type: "get",
+                                success: function (data) {
+
+                                    $('#pagination1').jqPaginator('option', {
+                                        currentPage: data.currentPage,
+                                        totalPages: data.totalCount
+                                    });
+
+
+                                    $("#tab").html('<div style="color: #1abc9c" class="row">' +
+                                        '<div class="col-xs-2">' + "图片" + '</div>' +
+                                        '<div class="col-xs-2">' + "菜名" + '</div>' +
+                                        '<div class="col-xs-2">' + "库存" + '</div>' +
+                                        '<div class="col-xs-2">' + "单价" + '</span></div>' +
+                                        '<div class="col-xs-2">' + "状态" + '</div>' +
+                                        '<div class="col-xs-1">' + "操作" + '</div>' +
+                                        '<div class="col-xs-1">' + "编辑" + '</div>'
+                                        + '</div>');
+
+
+                                    for (var i = 0; i < data.data.length; i++) {
+                                        var status = '';
+                                        if (data.data[i].productStatus == 1) {
+                                            status = "已上架";
+                                        }
+                                        if (data.data[i].productStatus == 0) {
+                                            status = "已下架";
+                                        }
+
+
+                                        $("#tab").append(
+                                            '<div style="color: #1abc9c" class="row">' +
+                                            '<div class="col-xs-2"><img width="80px" height="70px" src=' + data.data[i].productIcon + '></div>' +
+                                            '<div class="col-xs-2">' + data.data[i].productName + '</div>' +
+                                            '<div class="col-xs-2">' + data.data[i].productStock + '</div>' +
+                                            '<div class="col-xs-2">' + '¥<span style="color: red">' + data.data[i].productPrice + '</span></div>' +
+                                            '<div class="col-xs-2">' + status + '</div>' +
+                                            '<div class="col-xs-1">' + '<button id='+data.data[i].productId+'></button></div>' +
+                                            '<div class="col-xs-1">' + '<a  href="/product/toEditProduct?productId='+data.data[i].productId+'" class="btn btn-info" >编辑</a>' + '</div>'
+                                            + '</div>'
+                                        )
+
+                                        if (data.data[i].productStatus == 1) {
+
+                                            var action="DownProduct('"+data.data[i].productId+"')";
+
+                                            $("#"+data.data[i].productId).addClass("btn btn-default");
+                                            $("#"+data.data[i].productId).text("点击下架");
+                                            $("#"+data.data[i].productId).attr("onclick",action);
+
+                                        }
+
+                                        if (data.data[i].productStatus == 0) {
+                                            var action="UpProduct('"+data.data[i].productId+"')";
+
+                                            $("#"+data.data[i].productId).addClass("btn btn-danger");
+                                            $("#"+data.data[i].productId).text("点击上架");
+                                            $("#"+data.data[i].productId).attr("onclick",action);
+                                        }
+
+
+                                    }
+
+
+                                }
+                            });
+
+
+                        }
+
+
+                    });
+                }
+
+                //页面加载之后 加载分页
+                window.onload = function () {
+
+                    //初始化下拉框selectDateS
+                    $.ajax({
+                        url: "/product/queryProductType",
+                        type: "get",
+                        dataType: "json",//预期服务器返回的数据类型
+                        contentType: "application/json",
+                        success: function (data) {
+                            for (var i = 0; i < data.length; i++) {
+
+                                $("#selectDateS").append(
+                                    '<option value=' + data[i].categoryType + '>' + data[i].categoryName + '</option>'
+                                )
+
+                            }
+
+                        }
+                    });
+
+                    //加载分页
+                    page('', '', '');
+                }
+
+
+                function seacher() {
+
+                    var condition = $("#selectDateS").val();
+                    var name = $("#orderNum").val();
+                    var Status = $("#Status").val();
+
+                    if (name == null || name == '') {
+
+                        page(condition, name, Status);
+
+
+                    } else {
+                        page('', name, '');
+                        $("#selectDateS").val('');
+                        $("#Status").val('');
+
+
+                    }
+
+
+                }
+
+
+                //商家操作上架
+                function UpProduct(prudctId) {
+                    $.ajax({
+                        url: "/product/UpProduct?prudctId=" + prudctId,
+                        type: "get",
+                        dataType: "json",//预期服务器返回的数据类型
+                        contentType: "application/json",
+                        success: function (data) {
+                            if (data == 1) {
+                                alert("提交成功");
+                                window.location.reload();
+                            }
+                        }
+                    });
+
+                }
+
+                //商家操作下架
+                function DownProduct(prudctId) {
+                    $.ajax({
+                        url: "/product/DownProduct?prudctId=" + prudctId,
+                        type: "get",
+                        dataType: "json",//预期服务器返回的数据类型
+                        contentType: "application/json",
+                        success: function (data) {
+                            if (data == 1) {
+                                alert("提交成功");
+                                window.location.reload();
+                            }
+                        }
+                    });
+
+                }
+
+                /*]]>*/
+            </script>
+
+        </div>
+
+
+    </div>
+</div>
+
+</body>
+
+</html>
